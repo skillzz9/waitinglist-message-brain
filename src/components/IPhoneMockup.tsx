@@ -36,49 +36,89 @@ const SF: React.CSSProperties = {
 
 /* ─── daily summary screen ───────────────────── */
 function DailySummaryScreen() {
+  const pills = [
+    { icon: '🌙', label: 'Mood',     score: 72 },
+    { icon: '🌱', label: 'Growth',   score: 85 },
+    { icon: '💬', label: 'Activity', score: 91 },
+  ];
   return (
-    <div style={{ width: '100%', height: '100%', background: '#000', display: 'flex', flexDirection: 'column', ...SF }}>
-      <div style={{ padding: '6px 16px 10px', borderBottom: '0.5px solid rgba(255,255,255,0.08)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(135deg, #E8B55E 0%, #DC5A40 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width={13} height={13} viewBox="0 0 32 32" fill="none">
-              <path d="M16 3 L19.5 11 L28 9 L22 16 L26 25 L16 21 L6 25 L10 16 L4 9 L12.5 11 Z" fill="white" fillOpacity="0.92" />
+    <div style={{
+      width: '100%', height: '100%', display: 'flex', flexDirection: 'column', ...SF,
+      background: 'linear-gradient(175deg, #1a1f3c 0%, #2d2040 30%, #6b3a2a 62%, #c47a3a 82%, #e8a84a 100%)',
+      position: 'relative', overflow: 'hidden',
+    }}>
+      {/* atmospheric haze layer */}
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 120% 50% at 50% 90%, rgba(240,200,120,0.18) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+      {/* content */}
+      <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', padding: '14px 16px 0' }}>
+        {/* greeting */}
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 2 }}>☀️ Good Morning</div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: 'white', lineHeight: 1.2, marginBottom: 18 }}>How are you doing?</div>
+
+        {/* score */}
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.05em', marginBottom: 2 }}>Daily Score</div>
+          <div style={{ fontSize: 72, fontWeight: 800, color: 'white', lineHeight: 1, letterSpacing: '-0.03em' }}>84</div>
+        </div>
+
+        {/* pill sub-scores */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 18 }}>
+          {pills.map(p => (
+            <div key={p.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(232,181,94,0.45)',
+                borderRadius: 100, padding: '5px 10px',
+              }}>
+                <span style={{ fontSize: 12 }}>{p.icon}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#E8B55E' }}>{p.score}</span>
+              </div>
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>{p.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* journal card */}
+        <div style={{
+          background: 'rgba(255,255,255,0.1)',
+          backdropFilter: 'blur(12px)',
+          border: '0.5px solid rgba(255,255,255,0.2)',
+          borderRadius: 16, padding: '12px 14px', flex: 1,
+        }}>
+          <div style={{ fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 14 }}>Today&apos;s Journal</div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: 8 }}>
+            <svg width={22} height={18} viewBox="0 0 24 20" fill="none">
+              <path d="M2 2h9v16H2zM13 2h9v16h-9z" stroke="rgba(232,181,94,0.5)" strokeWidth={1.5} strokeLinejoin="round"/>
             </svg>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(232,181,94,0.8)' }}>No entry yet today</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textAlign: 'center', lineHeight: 1.4 }}>Keep chatting — your journal{'\n'}generates automatically</div>
           </div>
-          <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Fae</span>
-        </div>
-        <div style={{ fontSize: 20, fontWeight: 700, color: 'white', marginBottom: 3 }}>Good morning ☀️</div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>Thursday · Jun 27</div>
-      </div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 7, scrollbarWidth: 'none' }}>
-        <div style={{ background: '#1C1C1E', borderRadius: 12, padding: '9px 12px' }}>
-          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>Messages</div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-            <span style={{ fontSize: 30, fontWeight: 700, color: '#E8B55E', lineHeight: 1 }}>12</span>
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>processed today</span>
-          </div>
-        </div>
-        <div style={{ background: '#1C1C1E', borderRadius: 12, padding: '9px 12px' }}>
-          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>Top Insight</div>
-          <div style={{ fontSize: 12, color: 'white', lineHeight: 1.5, fontStyle: 'italic' }}>
-            &ldquo;You&apos;ve mentioned the deadline 3 times — worth addressing today.&rdquo;
-          </div>
-        </div>
-        <div style={{ background: '#1C1C1E', borderRadius: 12, padding: '9px 12px' }}>
-          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 7 }}>Today&apos;s Themes</div>
-          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-            {['work', 'family', 'health'].map(t => (
-              <span key={t} style={{ background: 'rgba(232,181,94,0.12)', color: '#E8B55E', border: '0.5px solid rgba(232,181,94,0.2)', borderRadius: 100, padding: '2px 9px', fontSize: 11 }}>{t}</span>
-            ))}
-          </div>
-        </div>
-        <div style={{ background: '#1C1C1E', borderRadius: 12, padding: '9px 12px' }}>
-          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>Mood Signal</div>
-          <div style={{ fontSize: 14, color: 'white', fontWeight: 600 }}>Focused 🎯</div>
         </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: 8, paddingTop: 5 }}>
-        <div style={{ width: 105, height: 4, background: 'rgba(255,255,255,0.2)', borderRadius: 2 }} />
+
+      {/* tab bar */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-around', alignItems: 'center',
+        background: 'rgba(10,8,20,0.7)', backdropFilter: 'blur(16px)',
+        borderTop: '0.5px solid rgba(255,255,255,0.1)',
+        padding: '10px 0 12px', flexShrink: 0,
+      }}>
+        {[
+          { icon: '⊞', label: 'Dashboard', active: true },
+          { icon: '📅', label: 'Calendar',  active: false },
+          { icon: '⚙', label: 'Settings',  active: false },
+        ].map(t => (
+          <div key={t.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+            <div style={{
+              width: 36, height: 28, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: t.active ? 'rgba(232,181,94,0.2)' : 'transparent',
+            }}>
+              <span style={{ fontSize: 16 }}>{t.icon}</span>
+            </div>
+            <span style={{ fontSize: 9, color: t.active ? '#E8B55E' : 'rgba(255,255,255,0.4)', fontWeight: t.active ? 600 : 400 }}>{t.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
