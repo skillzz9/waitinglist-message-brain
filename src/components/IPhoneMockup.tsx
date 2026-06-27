@@ -153,6 +153,12 @@ export default function IPhoneMockup({ switcherProgress = 0 }: { switcherProgres
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept when the user is typing in a real input on the page
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
+        return;
+      }
+
       if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
       const k = e.key;
 
@@ -208,7 +214,14 @@ export default function IPhoneMockup({ switcherProgress = 0 }: { switcherProgres
       <div className="flex-1 relative overflow-hidden">
 
         {/* Switcher background */}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 0, background: '#0a0814', opacity: bgOpacity, pointerEvents: 'none' }} />
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 0,
+          backgroundImage: 'url(/background.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: bgOpacity,
+          pointerEvents: 'none',
+        }} />
 
         {/* iMessage card */}
         <div style={{

@@ -5,57 +5,113 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import GlassCard from '@/components/ui/GlassCard';
 import { SmoothBox } from '@/components/ui/SmoothBox';
 import IPhoneMockup from '@/components/IPhoneMockup';
+import { addToWaitlist } from '@/lib/firebase';
 
 const SideRays = dynamic(() => import('@/components/SideRays'), { ssr: false });
 
-function QuizCTA() {
+type WaitlistStatus = 'idle' | 'loading' | 'success' | 'error' | 'duplicate' | 'invalid';
+
+function WaitlistCTA() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<WaitlistStatus>('idle');
+  const disabled = status === 'loading' || status === 'success';
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (disabled) return;
+    setStatus('loading');
+    const result = await addToWaitlist(email);
+    if (result.ok) setStatus('success');
+    else setStatus(result.reason);
+  };
+
+  const statusText: Record<WaitlistStatus, string> = {
+    idle: 'fully private',
+    loading: 'joining…',
+    success: "you're on the list",
+    error: 'something went wrong — try again',
+    duplicate: 'already on the list',
+    invalid: 'enter a valid email',
+  };
+
+  const isError = status === 'error' || status === 'invalid' || status === 'duplicate';
+  const isSuccess = status === 'success';
+  const statusColor = isSuccess ? 'rgba(150,220,150,0.85)' : isError ? 'rgba(255,150,140,0.85)' : 'rgba(255,255,255,0.4)';
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <GlassCard
         radius={20}
         borderColor="rgba(255,255,255,0.16)"
         padding="p-0"
-        className="flex items-center gap-[18px] pl-[22px] pr-[13px] py-[13px] cursor-pointer"
+        className="flex items-center gap-[10px] pl-[18px] pr-[10px] py-[10px]"
       >
-        <span style={{ fontSize: 15, fontWeight: 500, color: 'white', whiteSpace: 'nowrap' }}>
-          Take the 3-min quiz
-        </span>
-        <SmoothBox
-          radius={12}
-          showBorder
-          borderColor="rgba(255,255,255,0.22)"
-          background="rgba(255,255,255,0.1)"
-          containerClassName="w-10 shrink-0"
-          className="h-10 flex items-center justify-center"
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={e => { setEmail(e.target.value); if (status !== 'idle') setStatus('idle'); }}
+          placeholder="your@email.com"
+          disabled={disabled}
+          className="flex-1 min-w-0 bg-transparent border-none outline-none text-white text-[14px] placeholder:text-white/40 disabled:opacity-60"
+        />
+        <button
+          type="submit"
+          disabled={disabled}
+          className="appearance-none bg-transparent border-none p-0 disabled:cursor-not-allowed"
+          style={{ cursor: disabled ? 'default' : 'pointer' }}
+          aria-label="Join the waitlist"
         >
-          <svg width={15} height={15} viewBox="0 0 15 15" fill="none">
+          <SmoothBox
+            radius={12}
+            showBorder
+            borderColor="rgba(255,255,255,0.22)"
+            background={isSuccess ? 'rgba(150,220,150,0.18)' : 'rgba(255,255,255,0.1)'}
+            containerClassName="w-10 shrink-0"
+            className="h-10 flex items-center justify-center"
+          >
+            {isSuccess ? (
+              <svg width={15} height={15} viewBox="0 0 15 15" fill="none">
+                <path d="M3 7.5l3.5 3.5L12 5" stroke="white" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            ) : status === 'loading' ? (
+              <svg width={15} height={15} viewBox="0 0 15 15" fill="none" style={{ animation: 'spin 0.8s linear infinite' }}>
+                <circle cx="7.5" cy="7.5" r="5.5" stroke="white" strokeOpacity="0.25" strokeWidth={1.8}/>
+                <path d="M13 7.5a5.5 5.5 0 0 0-5.5-5.5" stroke="white" strokeWidth={1.8} strokeLinecap="round"/>
+              </svg>
+            ) : (
+              <svg width={15} height={15} viewBox="0 0 15 15" fill="none">
+                <path
+                  d="M2.5 7.5h10M9 3.5l4 4-4 4"
+                  stroke="white"
+                  strokeWidth={1.8}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            )}
+          </SmoothBox>
+        </button>
+      </GlassCard>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingLeft: 10 }}>
+        {status === 'idle' && (
+          <svg width={13} height={13} viewBox="0 0 13 13" fill="none">
+            <circle cx="6.5" cy="6.5" r="5.75" stroke="rgba(255,255,255,0.3)" strokeWidth={1} />
             <path
-              d="M2.5 7.5h10M9 3.5l4 4-4 4"
-              stroke="white"
-              strokeWidth={1.8}
+              d="M4 6.5l2 2 3-3"
+              stroke="rgba(255,255,255,0.6)"
+              strokeWidth={1.2}
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           </svg>
-        </SmoothBox>
-      </GlassCard>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingLeft: 10 }}>
-        <svg width={13} height={13} viewBox="0 0 13 13" fill="none">
-          <circle cx="6.5" cy="6.5" r="5.75" stroke="rgba(255,255,255,0.3)" strokeWidth={1} />
-          <path
-            d="M4 6.5l2 2 3-3"
-            stroke="rgba(255,255,255,0.6)"
-            strokeWidth={1.2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.01em' }}>
-          fully private
+        )}
+        <span style={{ fontSize: 12, color: statusColor, letterSpacing: '0.01em' }}>
+          {statusText[status]}
         </span>
       </div>
-    </div>
+    </form>
   );
 }
 
@@ -194,7 +250,7 @@ export default function Home() {
           </div>
           <div style={{ flex: 1 }} />
           <div style={{ width: 268, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <QuizCTA />
+            <WaitlistCTA />
           </div>
         </div>
 
