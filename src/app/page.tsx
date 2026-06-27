@@ -63,6 +63,7 @@ const LERP = 0.055;
 
 export default function Home() {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [scrollProgress, setScrollProgress] = useState(0);
   const targetRef = useRef({ x: 0, y: 0 });
   const currentRef = useRef({ x: 0, y: 0 });
   const rafRef = useRef<number | null>(null);
@@ -90,31 +91,55 @@ export default function Home() {
     if (!rafRef.current) rafRef.current = requestAnimationFrame(runLoop);
   }, [runLoop]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    const { clientX, clientY } = e;
-    const { width, height, left, top } = e.currentTarget.getBoundingClientRect();
-    const nx = (clientX - left) / width - 0.5;
-    const ny = (clientY - top) / height - 0.5;
-    targetRef.current = { x: nx * 8, y: ny * -6 };
-    startLoop();
-  }, [startLoop]);
-
-  const handleMouseLeave = useCallback(() => {
-    targetRef.current = { x: 0, y: 0 };
-    startLoop();
-  }, [startLoop]);
-
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
 
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      targetRef.current = {
+        x: (e.clientX / window.innerWidth - 0.5) * 8,
+        y: (e.clientY / window.innerHeight - 0.5) * -6,
+      };
+      startLoop();
+    };
+    const onLeave = () => { targetRef.current = { x: 0, y: 0 }; startLoop(); };
+    window.addEventListener('mousemove', onMove);
+    document.documentElement.addEventListener('mouseleave', onLeave);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      document.documentElement.removeEventListener('mouseleave', onLeave);
+    };
+  }, [startLoop]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const range = window.innerHeight * 1.5;
+      setScrollProgress(Math.min(1, Math.max(0, window.scrollY / range)));
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const headingStyle: React.CSSProperties = {
+    fontSize: 46,
+    fontFamily: '"Exposure VAR", serif',
+    fontWeight: 400,
+    lineHeight: 1.1,
+    color: 'white',
+    letterSpacing: '-0.01em',
+    margin: 0,
+  };
+  const bodyStyle: React.CSSProperties = {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.48)',
+    lineHeight: 1.65,
+    maxWidth: 190,
+    margin: 0,
+  };
+
   return (
-    <main
-      className="relative h-screen w-screen overflow-hidden flex flex-col"
-      style={{ background: '#0d0804' }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
-      {/* WebGL SideRays background */}
-      <div className="absolute inset-0 z-0">
+    <>
+      {/* Fixed background */}
+      <div className="fixed inset-0" style={{ zIndex: 0, background: '#0d0804' }}>
         <SideRays
           rayColor1="#E8B55E"
           rayColor2="#DC5A40"
@@ -129,11 +154,10 @@ export default function Home() {
           opacity={1}
         />
       </div>
-
-      {/* Warm ambient overlay */}
       <div
-        className="absolute inset-0 z-0 pointer-events-none"
+        className="fixed inset-0 pointer-events-none"
         style={{
+          zIndex: 0,
           background: `
             radial-gradient(ellipse 70% 55% at 82% 18%, rgba(232, 181, 94, 0.32) 0%, transparent 65%),
             radial-gradient(ellipse 50% 50% at 95% 5%,  rgba(220, 90, 64, 0.22) 0%, transparent 55%),
@@ -142,57 +166,54 @@ export default function Home() {
         }}
       />
 
-      {/* UI layer */}
-      <div className="relative z-10 flex flex-col h-full">
-        {/* Three-column layout — centered as a group */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex items-center gap-10">
-            {/* Left — Headline */}
-            <div style={{ width: 170, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h1
-                style={{
-                  fontSize: 42,
-                  fontFamily: '"Exposure VAR", serif',
-                  fontWeight: 400,
-                  lineHeight: 1.1,
-                  color: 'white',
-                  letterSpacing: '-0.01em',
-                  margin: 0,
-                }}
-              >
-                Journal with the help of message brain
-              </h1>
-              <p
-                style={{
-                  fontSize: 13,
-                  color: 'rgba(255,255,255,0.48)',
-                  lineHeight: 1.65,
-                  maxWidth: 170,
-                  margin: 0,
-                }}
-              >
-                AI that helps you think things through.
-              </p>
-            </div>
+      {/* Fixed phone — stays centred while everything scrolls */}
+      <div
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: `translate(-50%, -50%) perspective(900px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)`,
+          zIndex: 10,
+          willChange: 'transform',
+        }}
+      >
+        <IPhoneMockup switcherProgress={scrollProgress} />
+      </div>
 
-            {/* Center — iPhone with subtle parallax tilt */}
-            <div
-              style={{
-                position: 'relative',
-                transform: `perspective(900px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)`,
-                willChange: 'transform',
-              }}
-            >
-              <IPhoneMockup />
-            </div>
+      {/* Scrollable content */}
+      <div style={{ position: 'relative', zIndex: 5, minHeight: '300vh' }}>
 
-            {/* Right — Quiz CTA */}
-            <div style={{ width: 220 }}>
-              <QuizCTA />
-            </div>
+        {/* Section 1 — hero copy (visible at scroll 0) */}
+        <div
+          className="flex items-center px-10"
+          style={{ height: '100vh' }}
+        >
+          <div style={{ width: 200, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <h1 style={headingStyle}>AI for the<br />cultured</h1>
+            <p style={bodyStyle}>Fae is a friend that has your back and understands you, starting with your FIPTI.</p>
+          </div>
+          <div style={{ flex: 1 }} />
+          <div style={{ width: 268, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <QuizCTA />
           </div>
         </div>
+
+        {/* 100vh spacer — phone animation plays here, no competing text */}
+        <div style={{ height: '100vh' }} />
+
+        {/* Section 2 — slides in exactly as daily summary fills the phone */}
+        <div
+          className="flex items-center px-10"
+          style={{ height: '100vh' }}
+        >
+          <div style={{ width: 200, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <h1 style={headingStyle}>Your day,<br />at a glance</h1>
+            <p style={bodyStyle}>Fae processes all your messages and surfaces what matters — every morning.</p>
+          </div>
+          <div style={{ flex: 1 }} />
+          <div style={{ width: 268, flexShrink: 0 }} />
+        </div>
       </div>
-    </main>
+    </>
   );
 }
