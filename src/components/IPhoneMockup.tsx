@@ -330,7 +330,8 @@ export default function IPhoneMockup({
   const finalKiteOpacity = inReverse ? (1 - Math.max(0, (revSwipeT - 0.7) / 0.3))       : kiteOpacity;
   const finalKiteRadius  = inReverse ? revEnterT * 14                                    : kiteRadius;
 
-  const finalBgOpacity   = inReverse ? Math.min(revEnterT * 1.5, 1) : bgOpacity;
+  // During reverse: bg stays at 1 through enter+swipe, fades as iMessage launches
+  const finalBgOpacity   = inReverse ? Math.max(0, 1 - revLaunchT) : bgOpacity;
 
   // ── Audio ──
   const tickHighRef   = useRef<(() => void) | null>(null);

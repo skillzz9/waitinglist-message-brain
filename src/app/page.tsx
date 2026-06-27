@@ -177,10 +177,10 @@ export default function Home() {
       setScrollProgress(Math.min(1, Math.max(0, sy / (vh * 1.5))));
       // Calendar tab crossfade (3.5vh → 4.3vh)
       setCalendarProgress(Math.min(1, Math.max(0, (sy - vh * 3.5) / (vh * 0.8))));
-      // Reverse switch: Kite → iMessage (5vh → 6vh)
-      setReverseProgress(Math.min(1, Math.max(0, (sy - vh * 5) / vh)));
-      // Notification banner slide-in (6.2vh → 6.7vh)
-      setNotificationProgress(Math.min(1, Math.max(0, (sy - vh * 6.2) / (vh * 0.5))));
+      // Reverse switch: Kite → iMessage (4.4vh → 5.4vh, right after calendar)
+      setReverseProgress(Math.min(1, Math.max(0, (sy - vh * 4.4) / vh)));
+      // Notification banner slide-in (5.6vh → 6.0vh)
+      setNotificationProgress(Math.min(1, Math.max(0, (sy - vh * 5.6) / (vh * 0.4))));
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
