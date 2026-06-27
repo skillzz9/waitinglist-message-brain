@@ -189,8 +189,8 @@ export default function Home() {
           style={{ height: '100vh' }}
         >
           <div style={{ width: 200, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <h1 style={headingStyle}>AI for the<br />cultured</h1>
-            <p style={bodyStyle}>Fae is a friend that has your back and understands you, starting with your FIPTI.</p>
+            <h1 style={headingStyle}>If AI had a<br />phone number,</h1>
+            <p style={bodyStyle}>you'd already be texting it. Fae is the AI that lives in your messages.</p>
           </div>
           <div style={{ flex: 1 }} />
           <div style={{ width: 268, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

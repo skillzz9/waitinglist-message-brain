@@ -38,7 +38,6 @@ const SF: React.CSSProperties = {
 function DailySummaryScreen() {
   return (
     <div style={{ width: '100%', height: '100%', background: '#000', display: 'flex', flexDirection: 'column', ...SF }}>
-      <StatusBar />
       <div style={{ padding: '6px 16px 10px', borderBottom: '0.5px solid rgba(255,255,255,0.08)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
           <div style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(135deg, #E8B55E 0%, #DC5A40 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -100,15 +99,18 @@ export default function IPhoneMockup({ switcherProgress = 0 }: { switcherProgres
   const swipeT  = N(p, 0.35, 0.65);
   const launchT = N(p, 0.65, 1.0);
 
+  // iMessage: zooms out to card size, then swipes right to reveal Fae behind it
   const imsgScale   = 1 - enterT * 0.28;
-  const imsgX       = -swipeT * 160;
-  const imsgOpacity = 1 - launchT;
+  const imsgX       = swipeT * 280;
+  const imsgOpacity = 1 - Math.max(0, (swipeT - 0.7) / 0.3);
   const imsgRadius  = enterT * 14;
 
-  const faeX      = (1 - swipeT) * 280;
-  const faeScale  = 0.72 + launchT * 0.28;
-  const faeRadius = (1 - launchT) * 14;
-  const bgOpacity = Math.min(enterT * 1.5, 1);
+  // Fae: sits centered directly behind iMessage, invisible until animation starts
+  const faeX       = 0;
+  const faeOpacity = enterT;
+  const faeScale   = 0.68 + launchT * 0.32;
+  const faeRadius  = (1 - launchT) * 14;
+  const bgOpacity  = Math.min(enterT * 1.5, 1);
 
   // Preloaded tick sound players
   const tickHighRef   = useRef<(() => void) | null>(null);
@@ -198,7 +200,11 @@ export default function IPhoneMockup({ switcherProgress = 0 }: { switcherProgres
 
   return (
     <div className="w-[273px] h-[557px] bg-[#111] rounded-[46px] border-[8px] border-[#2a2a2a] phone-shell overflow-hidden flex flex-col relative shrink-0">
-      <div className="absolute top-[8px] left-1/2 -translate-x-1/2 w-[80px] h-[20px] bg-black rounded-[10px] z-10"/>
+      <div className="absolute top-[8px] left-1/2 -translate-x-1/2 w-[80px] h-[20px] bg-black rounded-[10px] z-20"/>
+      {/* Permanent status bar — always visible, never animated */}
+      <div className="relative z-20 bg-black">
+        <StatusBar />
+      </div>
       <div className="flex-1 relative overflow-hidden">
 
         {/* Switcher background */}
@@ -206,7 +212,8 @@ export default function IPhoneMockup({ switcherProgress = 0 }: { switcherProgres
 
         {/* iMessage card */}
         <div style={{
-          position: 'absolute', inset: 0, zIndex: 1,
+          position: 'absolute', inset: 0, zIndex: 2,
+          background: '#000',
           transform: `translateX(${imsgX}px) scale(${imsgScale})`,
           transformOrigin: 'center center',
           borderRadius: imsgRadius,
@@ -215,7 +222,6 @@ export default function IPhoneMockup({ switcherProgress = 0 }: { switcherProgres
           display: 'flex', flexDirection: 'column',
           ...(enterT > 0 ? { boxShadow: '0 6px 28px rgba(0,0,0,0.8)' } : {}),
         }}>
-          <StatusBar />
           <ChatHeader />
           <MessageBubbles
             welcomePhase={welcomePhase}
@@ -228,11 +234,12 @@ export default function IPhoneMockup({ switcherProgress = 0 }: { switcherProgres
 
         {/* Fae daily summary card */}
         <div style={{
-          position: 'absolute', inset: 0, zIndex: 2,
+          position: 'absolute', inset: 0, zIndex: 1,
           transform: `translateX(${faeX}px) scale(${faeScale})`,
           transformOrigin: 'center center',
           borderRadius: faeRadius,
           overflow: 'hidden',
+          opacity: faeOpacity,
           ...(launchT < 0.95 ? { boxShadow: '0 6px 28px rgba(0,0,0,0.8)' } : {}),
         }}>
           <DailySummaryScreen />
