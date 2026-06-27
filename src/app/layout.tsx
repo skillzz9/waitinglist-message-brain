@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fae — AI for the cultured",
-  description: "Join the waitlist for Fae, an AI companion that understands you.",
+  title: "Kite — AI for the cultured",
+  description: "Join the waitlist for Kite, the AI that lives in your messages.",
 };
 
 export default function RootLayout({

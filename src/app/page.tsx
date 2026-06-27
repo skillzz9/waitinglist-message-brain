@@ -120,6 +120,9 @@ const LERP = 0.055;
 export default function Home() {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [calendarProgress, setCalendarProgress] = useState(0);
+  const [reverseProgress, setReverseProgress] = useState(0);
+  const [notificationProgress, setNotificationProgress] = useState(0);
   const targetRef = useRef({ x: 0, y: 0 });
   const currentRef = useRef({ x: 0, y: 0 });
   const rafRef = useRef<number | null>(null);
@@ -168,8 +171,16 @@ export default function Home() {
 
   useEffect(() => {
     const onScroll = () => {
-      const range = window.innerHeight * 1.5;
-      setScrollProgress(Math.min(1, Math.max(0, window.scrollY / range)));
+      const vh = window.innerHeight;
+      const sy = window.scrollY;
+      // Forward switch: iMessage → Kite (0 → 1.5vh)
+      setScrollProgress(Math.min(1, Math.max(0, sy / (vh * 1.5))));
+      // Calendar tab crossfade (3.5vh → 4.3vh)
+      setCalendarProgress(Math.min(1, Math.max(0, (sy - vh * 3.5) / (vh * 0.8))));
+      // Reverse switch: Kite → iMessage (5vh → 6vh)
+      setReverseProgress(Math.min(1, Math.max(0, (sy - vh * 5) / vh)));
+      // Notification banner slide-in (6.2vh → 6.7vh)
+      setNotificationProgress(Math.min(1, Math.max(0, (sy - vh * 6.2) / (vh * 0.5))));
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -190,6 +201,23 @@ export default function Home() {
     lineHeight: 1.65,
     maxWidth: 190,
     margin: 0,
+  };
+
+  // Text panel opacities — crossfade in sync with phone
+  const s1opacity = Math.max(0, 1 - scrollProgress / 0.25);
+  const s2opacity = Math.min(1, Math.max(0, (scrollProgress - 0.7) / 0.25)) * (1 - calendarProgress);
+  const s3opacity = calendarProgress * (1 - reverseProgress);
+  const s4opacity = reverseProgress;
+
+  const textPanel: React.CSSProperties = {
+    position: 'absolute',
+    top: 0, left: 0,
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+    transition: 'none',
+    pointerEvents: 'none',
   };
 
   return (
@@ -236,7 +264,52 @@ export default function Home() {
         }}
       />
 
-      {/* Fixed phone — stays centred while everything scrolls */}
+      {/* Fixed left text panel — crossfades between sections */}
+      <div style={{
+        position: 'fixed',
+        top: '50%',
+        left: 40,
+        transform: 'translateY(-50%)',
+        width: 200,
+        zIndex: 8,
+      }}>
+        {/* Section 1 */}
+        <div style={{ ...textPanel, opacity: s1opacity, pointerEvents: s1opacity > 0.05 ? 'auto' : 'none' }}>
+          <h1 style={headingStyle}>If AI had a<br />phone number,</h1>
+          <p style={bodyStyle}>you&apos;d already be texting it. Kite is the AI that lives in your messages.</p>
+        </div>
+        {/* Section 2 */}
+        <div style={{ ...textPanel, opacity: s2opacity }}>
+          <h1 style={headingStyle}>Your day,<br />at a glance</h1>
+          <p style={bodyStyle}>Kite processes all your messages and surfaces what matters — every morning.</p>
+        </div>
+        {/* Section 3 */}
+        <div style={{ ...textPanel, opacity: s3opacity }}>
+          <h1 style={headingStyle}>Your week,<br />before it happens</h1>
+          <p style={bodyStyle}>Kite connects the dots across your conversations and keeps your calendar honest.</p>
+        </div>
+        {/* Section 4 */}
+        <div style={{ ...textPanel, opacity: s4opacity }}>
+          <h1 style={headingStyle}>Nothing slips<br />through,</h1>
+          <p style={bodyStyle}>Kite notices what matters and asks if you need a nudge — reminders delivered straight to iMessage.</p>
+        </div>
+      </div>
+
+      {/* Fixed right panel — waitlist CTA (section 1 only) */}
+      <div style={{
+        position: 'fixed',
+        top: '50%',
+        right: 40,
+        transform: 'translateY(-50%)',
+        width: 268,
+        zIndex: 8,
+        opacity: s1opacity,
+        pointerEvents: s1opacity > 0.05 ? 'auto' : 'none',
+      }}>
+        <WaitlistCTA />
+      </div>
+
+      {/* Fixed phone */}
       <div
         style={{
           position: 'fixed',
@@ -247,43 +320,16 @@ export default function Home() {
           willChange: 'transform',
         }}
       >
-        <IPhoneMockup switcherProgress={scrollProgress} />
+        <IPhoneMockup
+          switcherProgress={scrollProgress}
+          calendarProgress={calendarProgress}
+          reverseProgress={reverseProgress}
+          notificationProgress={notificationProgress}
+        />
       </div>
 
-      {/* Scrollable content */}
-      <div style={{ position: 'relative', zIndex: 5, minHeight: '300vh' }}>
-
-        {/* Section 1 — hero copy (visible at scroll 0) */}
-        <div
-          className="flex items-center px-10"
-          style={{ height: '100vh' }}
-        >
-          <div style={{ width: 200, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <h1 style={headingStyle}>If AI had a<br />phone number,</h1>
-            <p style={bodyStyle}>you'd already be texting it. Fae is the AI that lives in your messages.</p>
-          </div>
-          <div style={{ flex: 1 }} />
-          <div style={{ width: 268, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <WaitlistCTA />
-          </div>
-        </div>
-
-        {/* 100vh spacer — phone animation plays here, no competing text */}
-        <div style={{ height: '100vh' }} />
-
-        {/* Section 2 — slides in exactly as daily summary fills the phone */}
-        <div
-          className="flex items-center px-10"
-          style={{ height: '100vh' }}
-        >
-          <div style={{ width: 200, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <h1 style={headingStyle}>Your day,<br />at a glance</h1>
-            <p style={bodyStyle}>Fae processes all your messages and surfaces what matters — every morning.</p>
-          </div>
-          <div style={{ flex: 1 }} />
-          <div style={{ width: 268, flexShrink: 0 }} />
-        </div>
-      </div>
+      {/* Scrollable spacer — just provides scroll height, no visible content */}
+      <div style={{ position: 'relative', zIndex: 5, minHeight: '800vh' }} />
     </>
   );
 }

@@ -13,10 +13,10 @@ export default function ChatHeader() {
       {/* Avatar + name */}
       <div className="flex flex-col items-center gap-[2px]">
         <div className="w-7 h-7 rounded-full bg-[linear-gradient(135deg,#E8B55E_0%,#DC5A40_100%)] flex items-center justify-center text-[11px] font-semibold text-white font-sf">
-          F
+          K
         </div>
         <div className="flex flex-col items-center leading-tight">
-          <span className="text-[11px] font-semibold text-white font-sf">Fae</span>
+          <span className="text-[11px] font-semibold text-white font-sf">Kite</span>
           <span className="text-[9px] text-white/45 font-sf">iMessage</span>
         </div>
       </div>
