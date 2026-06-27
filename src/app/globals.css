@@ -19,6 +19,11 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-sf: -apple-system, "SF Pro Text", system-ui, sans-serif;
+}
+
+.phone-shell {
+  box-shadow: 0 0 0 1px #3a3a3a, 0 32px 80px rgba(0,0,0,0.6), inset 0 0 0 1px #0a0a0a;
 }
 
 html,
