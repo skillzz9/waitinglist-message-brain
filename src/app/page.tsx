@@ -221,6 +221,20 @@ export default function Home() {
           `,
         }}
       />
+      {/* Dusk overlay — blend of #8c7d84, #6f434c, #54607c, #815d5d, fades in on scroll */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          zIndex: 0,
+          opacity: scrollProgress,
+          background: `
+            radial-gradient(ellipse 70% 50% at 88% 12%, rgba(84, 96, 124, 0.75) 0%, transparent 65%),
+            radial-gradient(ellipse 65% 45% at 70% 35%, rgba(129, 93, 93, 0.55) 0%, transparent 70%),
+            radial-gradient(ellipse 80% 55% at 20% 75%, rgba(111, 67, 76, 0.65) 0%, transparent 70%),
+            radial-gradient(ellipse 90% 60% at 45% 50%, rgba(140, 125, 132, 0.45) 0%, transparent 75%)
+          `,
+        }}
+      />
 
       {/* Fixed phone — stays centred while everything scrolls */}
       <div
