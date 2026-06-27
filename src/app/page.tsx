@@ -25,8 +25,8 @@ function QuizCTA() {
           showBorder
           borderColor="rgba(255,255,255,0.22)"
           background="rgba(255,255,255,0.1)"
-          containerClassName="shrink-0"
-          className="w-10 h-10 flex items-center justify-center"
+          containerClassName="w-10 shrink-0"
+          className="h-10 flex items-center justify-center"
         >
           <svg width={15} height={15} viewBox="0 0 15 15" fill="none">
             <path
@@ -144,38 +144,38 @@ export default function Home() {
 
       {/* UI layer */}
       <div className="relative z-10 flex flex-col h-full">
-        {/* Three-column layout */}
-        <div className="flex-1 flex items-center px-6 gap-0">
-          {/* Left — Headline */}
-          <div style={{ width: 170, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <h1
-              style={{
-                fontSize: 42,
-                fontFamily: '"Exposure VAR", serif',
-                fontWeight: 400,
-                lineHeight: 1.1,
-                color: 'white',
-                letterSpacing: '-0.01em',
-                margin: 0,
-              }}
-            >
-              Journal with the help of message brain
-            </h1>
-            <p
-              style={{
-                fontSize: 13,
-                color: 'rgba(255,255,255,0.48)',
-                lineHeight: 1.65,
-                maxWidth: 170,
-                margin: 0,
-              }}
-            >
-              AI that helps you think things through.
-            </p>
-          </div>
+        {/* Three-column layout — centered as a group */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex items-center gap-10">
+            {/* Left — Headline */}
+            <div style={{ width: 170, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <h1
+                style={{
+                  fontSize: 42,
+                  fontFamily: '"Exposure VAR", serif',
+                  fontWeight: 400,
+                  lineHeight: 1.1,
+                  color: 'white',
+                  letterSpacing: '-0.01em',
+                  margin: 0,
+                }}
+              >
+                Journal with the help of message brain
+              </h1>
+              <p
+                style={{
+                  fontSize: 13,
+                  color: 'rgba(255,255,255,0.48)',
+                  lineHeight: 1.65,
+                  maxWidth: 170,
+                  margin: 0,
+                }}
+              >
+                AI that helps you think things through.
+              </p>
+            </div>
 
-          {/* Center — iPhone with subtle parallax tilt */}
-          <div className="flex-1 flex items-center justify-center">
+            {/* Center — iPhone with subtle parallax tilt */}
             <div
               style={{
                 position: 'relative',
@@ -185,19 +185,11 @@ export default function Home() {
             >
               <IPhoneMockup />
             </div>
-          </div>
 
-          {/* Right — Quiz CTA */}
-          <div
-            style={{
-              width: 230,
-              flexShrink: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <QuizCTA />
+            {/* Right — Quiz CTA */}
+            <div style={{ width: 220 }}>
+              <QuizCTA />
+            </div>
           </div>
         </div>
       </div>
