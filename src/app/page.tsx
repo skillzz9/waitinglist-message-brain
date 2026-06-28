@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import GlassCard from '@/components/ui/GlassCard';
 import { SmoothBox } from '@/components/ui/SmoothBox';
 import IPhoneMockup from '@/components/IPhoneMockup';
@@ -125,10 +125,7 @@ function WaitlistCTA() {
   );
 }
 
-const LERP = 0.055;
-
 export default function Home() {
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [scrollProgress, setScrollProgress] = useState(0);
   const [calendarProgress, setCalendarProgress] = useState(0);
   const [reverseProgress, setReverseProgress] = useState(0);
@@ -136,34 +133,6 @@ export default function Home() {
   const [section5Progress, setSection5Progress] = useState(0);
   const [meditationNotifProgress, setMeditationNotifProgress] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const targetRef = useRef({ x: 0, y: 0 });
-  const currentRef = useRef({ x: 0, y: 0 });
-  const rafRef = useRef<number | null>(null);
-
-  const runLoop = useCallback(() => {
-    const cx = currentRef.current.x + (targetRef.current.x - currentRef.current.x) * LERP;
-    const cy = currentRef.current.y + (targetRef.current.y - currentRef.current.y) * LERP;
-    currentRef.current = { x: cx, y: cy };
-    setTilt({ x: cx, y: cy });
-
-    const settled =
-      Math.abs(cx - targetRef.current.x) < 0.005 &&
-      Math.abs(cy - targetRef.current.y) < 0.005;
-
-    if (settled) {
-      currentRef.current = { ...targetRef.current };
-      setTilt({ ...targetRef.current });
-      rafRef.current = null;
-    } else {
-      rafRef.current = requestAnimationFrame(runLoop);
-    }
-  }, []);
-
-  const startLoop = useCallback(() => {
-    if (!rafRef.current) rafRef.current = requestAnimationFrame(runLoop);
-  }, [runLoop]);
-
-  useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -171,23 +140,6 @@ export default function Home() {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
-
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      targetRef.current = {
-        x: (e.clientX / window.innerWidth - 0.5) * 8,
-        y: (e.clientY / window.innerHeight - 0.5) * -6,
-      };
-      startLoop();
-    };
-    const onLeave = () => { targetRef.current = { x: 0, y: 0 }; startLoop(); };
-    window.addEventListener('mousemove', onMove);
-    document.documentElement.addEventListener('mouseleave', onLeave);
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      document.documentElement.removeEventListener('mouseleave', onLeave);
-    };
-  }, [startLoop]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -321,7 +273,7 @@ export default function Home() {
           left: '50%',
           transform: isMobile
             ? 'translate(-50%, -50%) scale(0.78)'
-            : `translate(-50%, -50%) perspective(900px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)`,
+            : 'translate(-50%, -50%)',
           zIndex: 10,
           willChange: 'transform',
         }}
