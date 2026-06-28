@@ -54,7 +54,7 @@ function WaitlistCTA() {
         radius={20}
         borderColor="rgba(255,255,255,0.7)"
         padding="p-0"
-        className="flex items-center gap-[10px] pl-[18px] pr-[10px] py-[10px]"
+        className="flex items-center gap-[10px] pl-[18px] pr-[10px] py-[13px] md:py-2.5"
       >
         <input
           type="email"
@@ -63,7 +63,7 @@ function WaitlistCTA() {
           onChange={e => { setEmail(e.target.value); if (status !== 'idle') setStatus('idle'); }}
           placeholder="your@email.com"
           disabled={disabled}
-          className="flex-1 min-w-0 bg-transparent border-none outline-none text-[#2a1808] text-[14px] placeholder:text-[#2a1808] disabled:opacity-60"
+          className="flex-1 min-w-0 bg-transparent border-none outline-none text-[#2a1808] text-[16px] md:text-[14px] placeholder:text-[#2a1808]/45 disabled:opacity-60"
         />
         <button
           type="submit"
@@ -77,8 +77,8 @@ function WaitlistCTA() {
             showBorder
             borderColor="rgba(255,255,255,0.22)"
             background={isSuccess ? 'rgba(150,220,150,0.18)' : 'rgba(255,255,255,0.1)'}
-            containerClassName="w-10 shrink-0"
-            className="h-10 flex items-center justify-center"
+            containerClassName="w-12 md:w-10 shrink-0"
+            className="h-12 md:h-10 flex items-center justify-center"
           >
             {isSuccess ? (
               <svg width={15} height={15} viewBox="0 0 15 15" fill="none">
@@ -247,7 +247,7 @@ export default function Home() {
       <div style={{
         position: 'fixed',
         ...(isMobile ? {
-          top: '12%',
+          top: '6%',
           left: '50%',
           transform: 'translateX(-50%)',
           width: '82vw',
@@ -282,14 +282,14 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Waitlist CTA — desktop: right side; mobile: fixed bottom */}
+      {/* Waitlist CTA — desktop: right side; mobile: above the phone */}
       <div style={{
         position: 'fixed',
         zIndex: 8,
         opacity: s1opacity,
         pointerEvents: s1opacity > 0.05 ? 'auto' : 'none',
         ...(isMobile ? {
-          bottom: 28,
+          top: '26%',
           left: '50%',
           transform: 'translateX(-50%)',
           width: '82vw',
@@ -303,14 +303,14 @@ export default function Home() {
         <WaitlistCTA />
       </div>
 
-      {/* Fixed phone — mobile: lower on screen to leave room for text above */}
+      {/* Fixed phone — mobile: pushed lower to leave room for waitlist above */}
       <div
         style={{
           position: 'fixed',
-          top: isMobile ? '58%' : '50%',
+          top: isMobile ? '66%' : '50%',
           left: '50%',
           transform: isMobile
-            ? 'translate(-50%, -50%)'
+            ? 'translate(-50%, -50%) scale(0.78)'
             : `translate(-50%, -50%) perspective(900px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)`,
           zIndex: 10,
           willChange: 'transform',
