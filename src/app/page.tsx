@@ -44,7 +44,7 @@ function WaitlistCTA() {
   const statusColor = isSuccess ? 'rgba(60,120,50,0.95)' : isError ? 'rgba(180,50,40,0.95)' : 'rgba(58,40,24,0.6)';
 
   return (
-    <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <span
         style={{
           fontSize: 11,
@@ -140,13 +140,47 @@ export default function Home() {
   const [section5Progress, setSection5Progress] = useState(0);
   const [meditationNotifProgress, setMeditationNotifProgress] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [windowHeight, setWindowHeight] = useState(800);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 1024);
+    const check = () => {
+      setIsMobile(window.innerWidth < 1024);
+      setWindowHeight(window.innerHeight);
+    };
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
+
+  // Safe layout calculations for mobile to guarantee no overlap
+  const isShortScreen = isMobile && windowHeight < 750;
+  // Text panel height depends on text wrapping
+  const textPanelHeight = isMobile && window.innerWidth < 400 ? (isShortScreen ? 140 : 170) : 125;
+  
+  // The phone's base position calculations
+  const baseWaitlistBottomPx = (windowHeight * (isShortScreen ? 0.02 : 0.06)) + textPanelHeight + 5 + 58;
+  const phoneTopEdge = baseWaitlistBottomPx + 10;
+  const availablePhoneHeight = isMobile ? windowHeight - phoneTopEdge - 5 : 850;
+  const basePhoneScale = isMobile 
+    ? Math.max(0.65, Math.min(0.78, availablePhoneHeight / 850))
+    : Math.min(1.0, windowHeight / 900);
+    
+  // The user requested scaling the phone size by 20% but anchoring its center
+  const phoneScale = basePhoneScale * 1.2;
+  const phoneTopPx = isMobile ? phoneTopEdge + (850 * basePhoneScale / 2) : 0;
+  
+  // The phone grew upwards by this amount:
+  const phoneTopOverlapPx = isMobile ? (850 * basePhoneScale * 0.1) : 0;
+  const newPhoneTopEdge = phoneTopEdge - phoneTopOverlapPx;
+  
+  // Place the waitlist box with a NEGATIVE margin relative to the phone's top edge
+  // This pulls it down into the phone's bounding box (which has some transparent space)
+  // to avoid it overlapping the top text panel and pushing the title off-screen!
+  const waitlistTopPxAdjusted = isMobile ? newPhoneTopEdge - 58 + 40 : 0;
+  
+  // Ensure the text panel is pushed up high enough so it doesn't overlap the waitlist box,
+  // but NEVER let it go off the screen (minimum 15px from top).
+  const textPanelTopPx = isMobile ? Math.max(15, Math.min(windowHeight * (isShortScreen ? 0.02 : 0.06), waitlistTopPxAdjusted - textPanelHeight - 5)) : 0;
 
   useEffect(() => {
     const onScroll = () => {
@@ -199,7 +233,7 @@ export default function Home() {
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
-    gap: 16,
+    gap: isShortScreen ? 4 : 16,
     transition: 'none',
     pointerEvents: 'none',
   };
@@ -226,7 +260,7 @@ export default function Home() {
           position: 'absolute',
           pointerEvents: 'auto',
           ...(isMobile ? {
-            top: '6%',
+            top: `${textPanelTopPx}px`,
             left: '50%',
             transform: 'translateX(-50%)',
             width: '82vw',
@@ -256,7 +290,7 @@ export default function Home() {
           </div>
           {/* Section 4 — Reverse switch: meditation */}
           <div style={{ ...textPanel, opacity: s4opacity }}>
-            <h1 style={headingStyle}>Recommends what you need<br />when you need it,</h1>
+            <h1 style={headingStyle}>Gives you what you need,</h1>
             <p style={bodyStyle}>Meditation app built in, set up based on how YOU feel.</p>
           </div>
           {/* Section 5 — Reminders */}
@@ -271,9 +305,10 @@ export default function Home() {
           position: 'absolute',
           pointerEvents: 'auto',
           ...(isMobile ? {
-            top: '26%',
+            top: `${waitlistTopPxAdjusted}px`,
             left: '50%',
-            transform: 'translateX(-50%)',
+            transform: 'translateX(-50%) scale(0.75)',
+            transformOrigin: 'top center',
             width: '82vw',
           } : {
             top: '50%',
@@ -289,11 +324,11 @@ export default function Home() {
         {/* Phone */}
         <div style={{
           position: 'absolute',
-          top: isMobile ? '66%' : '50%',
+          top: isMobile ? `${phoneTopPx}px` : '50%',
           left: '50%',
           transform: isMobile
-            ? 'translate(-50%, -50%) scale(0.78)'
-            : 'translate(-50%, -50%)',
+            ? `translate(-50%, -50%) scale(${phoneScale})`
+            : `translate(-50%, -50%) scale(${phoneScale})`,
           zIndex: 10,
           willChange: 'transform',
           pointerEvents: 'auto',

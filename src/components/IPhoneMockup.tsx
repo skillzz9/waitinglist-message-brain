@@ -466,7 +466,15 @@ function MeditationChat({ opacity, triggered, onNotifReady }: { opacity: number;
   const fullMessage = useMemo(() => "Hey I'm not feeling too well", []);
 
   useEffect(() => {
-    if (!triggered || hasStartedRef.current) return;
+    if (!triggered) {
+      clearAllTimers();
+      setPhase('idle');
+      setTypedText('');
+      setPressedKey(null);
+      hasStartedRef.current = false;
+      return;
+    }
+    if (hasStartedRef.current) return;
     hasStartedRef.current = true;
     setPhase('typing');
 
