@@ -226,7 +226,7 @@ function ReminderChat({ opacity }: { opacity: number }) {
         ))}
         <div style={{ textAlign: 'right', fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: -6 }}>Delivered</div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', padding: '8px 10px', borderTop: '0.5px solid rgba(255,255,255,0.1)', gap: 8, flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '8px 10px 22px', borderTop: '0.5px solid rgba(255,255,255,0.1)', gap: 8, flexShrink: 0 }}>
         <div style={{ flex: 1, background: 'rgba(255,255,255,0.08)', borderRadius: 18, padding: '7px 12px', fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>
           iMessage
         </div>
