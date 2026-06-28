@@ -248,7 +248,7 @@ export default function Home() {
   return (
     <>
       {/* Hand-drawn scrolling background — zooms in to solid beige as user scrolls */}
-      <HandDrawnBackground scrollProgress={scrollProgress} />
+      <HandDrawnBackground />
 
       {/* Fixed left text panel — desktop: left side; mobile: centred above phone */}
       <div style={{

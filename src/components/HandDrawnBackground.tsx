@@ -10,38 +10,27 @@ const GROUND_Y = 410;
 const SCROLL_SPEED = 18;
 const BOIL_MS = 100;
 
-export default function HandDrawnBackground({ scrollProgress = 0 }: { scrollProgress?: number }) {
-  const bgRef      = useRef<SVGSVGElement>(null);
-  const dskSunRef  = useRef<SVGSVGElement>(null);
-  const sunRef     = useRef<SVGSVGElement>(null);
-  const cloudRef   = useRef<SVGSVGElement>(null);
-  const fgRef      = useRef<SVGSVGElement>(null);
-  const skyRef     = useRef<SVGSVGElement>(null);
-  const skyDivRef  = useRef<HTMLDivElement>(null);
-  const spRef      = useRef(scrollProgress);
-
-  useEffect(() => { spRef.current = scrollProgress; }, [scrollProgress]);
+export default function HandDrawnBackground() {
+  const bgRef     = useRef<SVGSVGElement>(null);
+  const dskSunRef = useRef<SVGSVGElement>(null);
+  const sunRef    = useRef<SVGSVGElement>(null);
+  const cloudRef  = useRef<SVGSVGElement>(null);
+  const fgRef     = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    if (
-      !bgRef.current || !dskSunRef.current || !sunRef.current ||
-      !cloudRef.current || !fgRef.current || !skyRef.current || !skyDivRef.current
-    ) return;
+    if (!bgRef.current || !dskSunRef.current || !sunRef.current || !cloudRef.current || !fgRef.current) return;
 
     const bg     = bgRef.current;
     const dskSun = dskSunRef.current;
     const sun    = sunRef.current;
     const cloud  = cloudRef.current;
     const fg     = fgRef.current;
-    const sky    = skyRef.current;
-    const skyDiv = skyDivRef.current;
 
     const rcBg     = rough.svg(bg);
     const rcDskSun = rough.svg(dskSun);
     const rcSun    = rough.svg(sun);
     const rcCloud  = rough.svg(cloud);
     const rcFg     = rough.svg(fg);
-    const rcSky    = rough.svg(sky);
 
     let frame = 0;
     const start = performance.now();
@@ -55,18 +44,11 @@ export default function HandDrawnBackground({ scrollProgress = 0 }: { scrollProg
         boilTick = (boilTick % 6) + 1;
         lastBoil = now;
       }
-
       renderBackground(bg, rcBg, t, boilTick);
       renderDesktopSun(dskSun, rcDskSun, boilTick);
       renderMobileSun(sun, rcSun, boilTick);
       renderClouds(cloud, rcCloud, t, boilTick);
       renderForeground(fg, rcFg, t, boilTick);
-
-      // Clouds + birds overlay — fades in once background is fully zoomed solid
-      const overlayOpacity = Math.max(0, Math.min(1, (spRef.current - 0.88) / 0.12));
-      skyDiv.style.opacity = String(overlayOpacity);
-      if (overlayOpacity > 0) renderSkyOverlay(sky, rcSky, t, boilTick);
-
       frame = requestAnimationFrame(draw);
     };
 
@@ -74,46 +56,16 @@ export default function HandDrawnBackground({ scrollProgress = 0 }: { scrollProg
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  const dipEnd = 0.2;
-  const dip    = scrollProgress < dipEnd
-    ? -0.04 * Math.sin((Math.PI * scrollProgress) / dipEnd)
-    : 0;
-  const scale = 1 + dip + Math.pow(scrollProgress, 3) * 5;
-
   return (
     <div
       className="fixed inset-0 overflow-hidden pointer-events-none"
       style={{ zIndex: 0, background: 'linear-gradient(180deg, #f5e8cf 0%, #ecd7ad 55%, #d9c290 100%)' }}
     >
-      {/* Zooming hand-drawn scene */}
-      <div
-        className="absolute"
-        style={{
-          inset: '-8%',
-          transform: `scale(${scale})`,
-          transformOrigin: '50% 35%',
-          willChange: 'transform',
-        }}
-      >
-        <svg ref={bgRef}    viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full block" />
-        <svg ref={dskSunRef} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full block hidden md:block" />
-        <svg ref={sunRef}   viewBox="0 0 200 200"      className="absolute top-3 left-3 sm:top-5 sm:left-5 w-20 sm:w-24 h-auto md:hidden" />
-        <svg ref={cloudRef} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full block" />
-        <svg ref={fgRef}    viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full block" />
-      </div>
-
-      {/* Animated clouds + birds — outside zoom so they appear at natural scale */}
-      <div
-        ref={skyDivRef}
-        style={{ position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none' }}
-      >
-        <svg
-          ref={skyRef}
-          viewBox={`0 0 ${W} ${H}`}
-          preserveAspectRatio="xMidYMid slice"
-          className="absolute inset-0 w-full h-full block"
-        />
-      </div>
+      <svg ref={bgRef}     viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full block" />
+      <svg ref={dskSunRef} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full block hidden md:block" />
+      <svg ref={sunRef}    viewBox="0 0 200 200"      className="absolute top-3 left-3 sm:top-5 sm:left-5 w-20 sm:w-24 h-auto md:hidden" />
+      <svg ref={cloudRef}  viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full block" />
+      <svg ref={fgRef}     viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full block" />
     </div>
   );
 }
@@ -249,48 +201,3 @@ function renderMobileSun(svg: SVGSVGElement, rc: RoughSVG, boilTick: number) {
   }
 }
 
-// ── Animated overlay: clouds (top + mid), smooth birds, rolling hills ────────
-function renderSkyOverlay(rootSvg: SVGSVGElement, rc: RoughSVG, t: number, boilTick: number) {
-  const svg  = makeMirror(rootSvg);
-  const seed = (o = 0) => ((boilTick + o) % 6) + 1;
-
-  // ── Clouds: top layer (3) + middle layer (2) ─────────────────────────────
-  const cloudDefs: [number, number, number, number, number][] = [
-    [130,  62, 130, 36, 12],   // top — fast
-    [570, 105, 104, 29,  8],
-    [1020,  48, 148, 42, 15],
-    [320,  240, 115, 30,  5],  // mid — slow
-    [820,  278,  88, 24,  7],
-  ];
-  cloudDefs.forEach(([bx, by, cw, ch, spd], i) => {
-    const x = ((bx + t * spd) % 1300 + 1300) % 1300 - 200;
-    svg.appendChild(rc.ellipse(x, by, cw, ch, {
-      stroke: '#7a6a5a', strokeWidth: 1.5,
-      fill: '#fdf6e6', fillStyle: 'solid',
-      roughness: 1.8, seed: seed(i + 100),
-    }));
-  });
-
-  // ── Birds: scribbly roughjs lines matching the cloud aesthetic ──────────
-  // [startX, y, count, spread, pxPerSec]
-  const flockDefs: [number, number, number, number, number][] = [
-    [220,  90, 3, 55, 22],
-    [850, 185, 4, 45, 16],
-  ];
-  flockDefs.forEach(([bx, by, count, spread, spd], fi) => {
-    const groupX = ((bx + t * spd) % 1500 + 1500) % 1500 - 180;
-    for (let bi = 0; bi < count; bi++) {
-      const birdX = groupX + (bi - (count - 1) / 2) * spread;
-      const birdY = by + Math.sin(t * 1.2 + bi * 1.1 + fi * 1.5) * 8;
-      const flap  = Math.sin(t * 5.5 + bi * 1.3 + fi * 2.2) * 9;
-      const ws = 24;
-      const vy = ws * 0.4;
-      svg.appendChild(rc.line(birdX, birdY, birdX - ws, birdY - vy - flap, {
-        stroke: '#3a2818', strokeWidth: 2, roughness: 2.8, seed: seed(fi * 20 + bi * 3 + 200),
-      }));
-      svg.appendChild(rc.line(birdX, birdY, birdX + ws, birdY - vy - flap, {
-        stroke: '#3a2818', strokeWidth: 2, roughness: 2.8, seed: seed(fi * 20 + bi * 3 + 201),
-      }));
-    }
-  });
-}
