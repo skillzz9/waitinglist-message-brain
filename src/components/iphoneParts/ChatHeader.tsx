@@ -1,6 +1,6 @@
 export default function ChatHeader() {
   return (
-    <div className="flex items-center justify-between px-[10px] pt-1 pb-[6px] border-b border-white/10">
+    <div className="flex items-center justify-between px-[14px] pt-1 pb-[6px] border-b border-white/10">
 
       {/* Back button */}
       <div className="flex items-center gap-[2px] text-[#0A84FF] text-[13px] font-sf">

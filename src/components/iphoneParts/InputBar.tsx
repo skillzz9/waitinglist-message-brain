@@ -4,7 +4,7 @@ export default function InputBar({ text }: { text: string }) {
   const hasText = text.length > 0;
 
   return (
-    <div className="flex items-center gap-[7px] py-[7px] pr-2 pl-[6px] bg-[#1C1C1E] border-t border-white/10">
+    <div className="flex items-center gap-[7px] py-[7px] pr-[10px] pl-[10px] bg-[#1C1C1E] border-t border-white/10">
 
       {/* + button — circle */}
       <div className="w-7 h-7 rounded-full bg-[#3A3A3C] flex items-center justify-center shrink-0">

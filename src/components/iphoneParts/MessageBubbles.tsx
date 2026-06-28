@@ -22,7 +22,7 @@ export default function MessageBubbles({ welcomePhase, userMessage, sendPhase }:
   const showFaeReply = sendPhase === 'fae-replied';
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto px-2 pt-[10px] pb-[6px] flex flex-col gap-[4px] bg-black [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex-1 min-h-0 overflow-y-auto px-3 pt-[10px] pb-[6px] flex flex-col gap-[4px] bg-black [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 
       {/* Pushes messages to bottom */}
       <div className="flex-1"/>

@@ -49,7 +49,7 @@ export default function StatusBar({ dark = false }: { dark?: boolean }) {
   }, []);
 
   return (
-    <div className="flex justify-between items-center px-[26px] pt-[18px] pb-[3px] text-[12px] font-semibold font-sf" style={{ color }}>
+    <div className="flex justify-between items-center px-[30px] pt-[18px] pb-[3px] text-[12px] font-semibold font-sf" style={{ color }}>
       <span>{time}</span>
       <div className="flex items-center gap-[6px]">
         <CellularIcon color={color} />
