@@ -53,6 +53,7 @@ function WaitlistCTA() {
           letterSpacing: '0.14em',
           textTransform: 'uppercase',
           paddingLeft: 10,
+          visibility: 'hidden',
         }}
       >
         Join waitlist
