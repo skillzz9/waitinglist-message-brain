@@ -61,7 +61,7 @@ function WaitlistCTA() {
         radius={20}
         borderColor="rgba(255,255,255,0.7)"
         padding="p-0"
-        className="flex items-center gap-[10px] pl-[18px] pr-[10px] py-[13px] md:py-2.5"
+        className="flex items-center gap-[10px] pl-[18px] pr-[10px] py-[13px] lg:py-2.5"
       >
         <input
           type="email"
@@ -70,7 +70,7 @@ function WaitlistCTA() {
           onChange={e => { setEmail(e.target.value); if (status !== 'idle') setStatus('idle'); }}
           placeholder="your@email.com"
           disabled={disabled}
-          className="flex-1 min-w-0 bg-transparent border-none outline-none text-[#2a1808] text-[16px] md:text-[14px] placeholder:text-[#2a1808]/45 disabled:opacity-60"
+          className="flex-1 min-w-0 bg-transparent border-none outline-none text-[#2a1808] text-[16px] lg:text-[14px] placeholder:text-[#2a1808]/45 disabled:opacity-60"
         />
         <button
           type="submit"
@@ -84,8 +84,8 @@ function WaitlistCTA() {
             showBorder
             borderColor="rgba(255,255,255,0.22)"
             background={isSuccess ? 'rgba(150,220,150,0.18)' : 'rgba(255,255,255,0.1)'}
-            containerClassName="w-12 md:w-10 shrink-0"
-            className="h-12 md:h-10 flex items-center justify-center"
+            containerClassName="w-12 lg:w-10 shrink-0"
+            className="h-12 lg:h-10 flex items-center justify-center"
           >
             {isSuccess ? (
               <svg width={15} height={15} viewBox="0 0 15 15" fill="none">
@@ -142,7 +142,7 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
+    const check = () => setIsMobile(window.innerWidth < 1024);
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
@@ -209,73 +209,86 @@ export default function Home() {
       {/* Hand-drawn scrolling background — zooms in to solid beige as user scrolls */}
       <HandDrawnBackground scrollProgress={scrollProgress} />
 
-      {/* Fixed left text panel — desktop: left side; mobile: centred above phone */}
+      {/* Layout container — centres and caps width on wide screens */}
       <div style={{
         position: 'fixed',
-        ...(isMobile ? {
-          top: '6%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '82vw',
-          textAlign: 'center',
-        } : {
-          top: '30%',
-          left: 40,
-          transform: 'translateY(-50%)',
-          width: 200,
-        }),
+        top: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: 1100,
+        height: '100vh',
+        pointerEvents: 'none',
         zIndex: 8,
       }}>
-        {/* Section 1 — iMessage: text Kite */}
-        <div style={{ ...textPanel, opacity: s1opacity, pointerEvents: s1opacity > 0.05 ? 'auto' : 'none' }}>
-          <h1 style={headingStyle}>Just text<br />Kite,</h1>
-          <p style={bodyStyle}>Tell it about your day like a diary, it&apos;s here to listen whenever you need it.</p>
+        {/* Left text panel */}
+        <div style={{
+          position: 'absolute',
+          pointerEvents: 'auto',
+          ...(isMobile ? {
+            top: '6%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '82vw',
+            textAlign: 'center',
+          } : {
+            top: '30%',
+            left: 40,
+            transform: 'translateY(-50%)',
+            width: 200,
+          }),
+          zIndex: 1,
+        }}>
+          {/* Section 1 — iMessage: text Kite */}
+          <div style={{ ...textPanel, opacity: s1opacity, pointerEvents: s1opacity > 0.05 ? 'auto' : 'none' }}>
+            <h1 style={headingStyle}>Just text<br />Kite,</h1>
+            <p style={bodyStyle}>Tell it about your day like a diary, it&apos;s here to listen whenever you need it.</p>
+          </div>
+          {/* Section 2 — Dashboard: private score */}
+          <div style={{ ...textPanel, opacity: s2opacity }}>
+            <h1 style={headingStyle}>Your score,<br />privately.</h1>
+            <p style={bodyStyle}>Kite stores everything you share privately and builds a daily score that&apos;s completely unique to you.</p>
+          </div>
+          {/* Section 3 — Calendar: growth */}
+          <div style={{ ...textPanel, opacity: s3opacity }}>
+            <h1 style={headingStyle}>Grow every<br />day,</h1>
+            <p style={bodyStyle}>In the Kite app, see how your day went, revisit past days, and find ways to become a better version of yourself.</p>
+          </div>
+          {/* Section 4 — Reverse switch: meditation */}
+          <div style={{ ...textPanel, opacity: s4opacity }}>
+            <h1 style={headingStyle}>There when<br />it counts,</h1>
+            <p style={bodyStyle}>Just tell Kite how you&apos;re feeling. It quietly sets things up in the app to look after you.</p>
+          </div>
+          {/* Section 5 — Reminders */}
+          <div style={{ ...textPanel, opacity: s5opacity }}>
+            <h1 style={headingStyle}>Nothing slips<br />through,</h1>
+            <p style={bodyStyle}>Kite notices what matters and asks if you need a nudge — reminders delivered straight to iMessage.</p>
+          </div>
         </div>
-        {/* Section 2 — Dashboard: private score */}
-        <div style={{ ...textPanel, opacity: s2opacity }}>
-          <h1 style={headingStyle}>Your score,<br />privately.</h1>
-          <p style={bodyStyle}>Kite stores everything you share privately and builds a daily score that&apos;s completely unique to you.</p>
-        </div>
-        {/* Section 3 — Calendar: growth */}
-        <div style={{ ...textPanel, opacity: s3opacity }}>
-          <h1 style={headingStyle}>Grow every<br />day,</h1>
-          <p style={bodyStyle}>In the Kite app, see how your day went, revisit past days, and find ways to become a better version of yourself.</p>
-        </div>
-        {/* Section 4 — Reverse switch: meditation */}
-        <div style={{ ...textPanel, opacity: s4opacity }}>
-          <h1 style={headingStyle}>There when<br />it counts,</h1>
-          <p style={bodyStyle}>Just tell Kite how you&apos;re feeling. It quietly sets things up in the app to look after you.</p>
-        </div>
-        {/* Section 5 — Reminders */}
-        <div style={{ ...textPanel, opacity: s5opacity }}>
-          <h1 style={headingStyle}>Nothing slips<br />through,</h1>
-          <p style={bodyStyle}>Kite notices what matters and asks if you need a nudge — reminders delivered straight to iMessage.</p>
-        </div>
-      </div>
 
-      {/* Waitlist CTA — desktop: right side; mobile: above the phone */}
-      <div style={{
-        position: 'fixed',
-        zIndex: 8,
-        ...(isMobile ? {
-          top: '26%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '82vw',
-        } : {
-          top: '50%',
-          right: 40,
-          transform: 'translateY(-50%)',
-          width: 268,
-        }),
-      }}>
-        <WaitlistCTA />
-      </div>
+        {/* Waitlist CTA — desktop: right side; mobile: above the phone */}
+        <div style={{
+          position: 'absolute',
+          pointerEvents: 'auto',
+          ...(isMobile ? {
+            top: '26%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '82vw',
+          } : {
+            top: '50%',
+            right: 40,
+            transform: 'translateY(-50%)',
+            width: 268,
+          }),
+          zIndex: 1,
+        }}>
+          <WaitlistCTA />
+        </div>
 
-      {/* Fixed phone — mobile: pushed lower to leave room for waitlist above */}
-      <div
-        style={{
-          position: 'fixed',
+        {/* Phone */}
+        <div style={{
+          position: 'absolute',
           top: isMobile ? '66%' : '50%',
           left: '50%',
           transform: isMobile
@@ -283,16 +296,17 @@ export default function Home() {
             : 'translate(-50%, -50%)',
           zIndex: 10,
           willChange: 'transform',
-        }}
-      >
-        <IPhoneMockup
-          switcherProgress={scrollProgress}
-          calendarProgress={calendarProgress}
-          reverseProgress={reverseProgress}
-          notificationProgress={notificationProgress}
-          section5Progress={section5Progress}
-          meditationNotifProgress={meditationNotifProgress}
-        />
+          pointerEvents: 'auto',
+        }}>
+          <IPhoneMockup
+            switcherProgress={scrollProgress}
+            calendarProgress={calendarProgress}
+            reverseProgress={reverseProgress}
+            notificationProgress={notificationProgress}
+            section5Progress={section5Progress}
+            meditationNotifProgress={meditationNotifProgress}
+          />
+        </div>
       </div>
 
       {/* Scrollable spacer — just provides scroll height, no visible content */}
