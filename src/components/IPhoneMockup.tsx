@@ -181,24 +181,26 @@ function DashboardScreen() {
   const CARD_MID   = '#6b5a3e';
   const CARD_LIGHT = '#9a8a78';
 
-  // Animate score slowly up and down so the KiteScene reacts live
-  const [liveScore, setLiveScore] = useState(65);
+  // Animate score from 50 → 100 on mount, ease-out over 9 seconds, stays at 100
+  const [liveScore, setLiveScore] = useState(50);
   useEffect(() => {
     const start = performance.now();
+    const DURATION = 9000;
     let raf: number;
     const tick = () => {
-      const t = (performance.now() - start) / 1000;
-      // 22-second full cycle, range 18–96
-      setLiveScore(Math.round(57 + Math.sin(t * 0.285) * 39));
-      raf = requestAnimationFrame(tick);
+      const elapsed = performance.now() - start;
+      const p = Math.min(1, elapsed / DURATION);
+      const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+      setLiveScore(Math.round(50 + eased * 50));
+      if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  const mood     = Math.round(52 + Math.sin(liveScore / 14 + 0.5) * 28);
-  const growth   = Math.round(60 + Math.sin(liveScore / 14 - 0.4) * 24);
-  const activity = Math.round(56 + Math.sin(liveScore / 14 + 1.1) * 26);
+  const mood     = Math.round(liveScore * 0.88);
+  const growth   = Math.round(liveScore * 0.92);
+  const activity = Math.round(liveScore * 0.85);
 
   const pills = [
     { icon: '🌙', label: 'Mood',     score: mood },
