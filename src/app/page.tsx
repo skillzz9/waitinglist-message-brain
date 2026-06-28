@@ -226,7 +226,7 @@ export default function Home() {
       {/* Fixed left text panel — crossfades between sections */}
       <div style={{
         position: 'fixed',
-        top: '50%',
+        top: '30%',
         left: 40,
         transform: 'translateY(-50%)',
         width: 200,
