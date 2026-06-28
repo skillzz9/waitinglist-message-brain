@@ -431,8 +431,8 @@ export default function IPhoneMockup({
   }, [triggerConversation]);
 
   return (
-    // Outer wrapper: provides the reference frame for the border overlay
-    <div style={{ position: 'relative', flexShrink: 0, width: 273, height: 557 }}>
+    // Outer wrapper: clips to rounded corners AND provides reference frame for border overlay
+    <div style={{ position: 'relative', flexShrink: 0, width: 273, height: 557, borderRadius: 46, overflow: 'hidden' }}>
 
     {/* Phone screen — clips all content to the rounded screen area */}
     <div

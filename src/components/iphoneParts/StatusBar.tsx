@@ -48,7 +48,7 @@ export default function StatusBar() {
   }, []);
 
   return (
-    <div className="flex justify-between items-center px-[18px] pt-[9px] pb-[3px] text-white text-[12px] font-semibold font-sf">
+    <div className="flex justify-between items-center px-[26px] pt-[9px] pb-[3px] text-white text-[12px] font-semibold font-sf">
       <span>{time}</span>
       <div className="flex items-center gap-[6px]">
         <CellularIcon />
