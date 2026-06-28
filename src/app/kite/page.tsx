@@ -5,7 +5,7 @@ import rough from 'roughjs';
 import type { RoughSVG } from 'roughjs/bin/svg';
 
 const VB_W = 400;
-const VB_H = 500;
+const VB_H = 420;
 
 export default function KiteLogoPage() {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -19,30 +19,32 @@ export default function KiteLogoPage() {
   }, []);
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-white p-8">
+    <main className="min-h-screen flex items-center justify-center p-8" style={{ backgroundColor: '#f7eed5' }}>
       <svg
         ref={svgRef}
         viewBox={`0 0 ${VB_W} ${VB_H}`}
         className="w-full max-w-[420px] h-auto"
+        style={{ transform: 'rotate(30deg) scaleX(-1)' }}
       />
     </main>
   );
 }
 
 function drawStaticKite(svg: SVGSVGElement, rc: RoughSVG) {
-  const cx = 200;
-  const cy = 165;
-  const rot = -0.12; // slight tilt for personality
+  // Rotate 45° so top vertex points to top-right, bottom vertex (tail) to bottom-left
+  const cx = 195;
+  const cy = 210;
+  const rot = Math.PI / 4 - 0.08; // ~43° — tip toward top-right corner
   const cos = Math.cos(rot);
   const sin = Math.sin(rot);
 
-  // Diamond body — bigger than the animated version so it reads as a logo
+  // Diamond body
   const diamond: Array<[number, number]> = (
     [
-      [0, -90],
-      [65, 0],
-      [0, 90],
-      [-65, 0],
+      [0, -90],   // top  → top-right after rotation
+      [65, 0],    // right → bottom-right after rotation
+      [0, 90],    // bottom → bottom-left after rotation (tail attaches here)
+      [-65, 0],   // left  → top-left after rotation
     ] as Array<[number, number]>
   ).map(([x, y]) => [
     cx + x * cos - y * sin,
@@ -82,13 +84,13 @@ function drawStaticKite(svg: SVGSVGElement, rc: RoughSVG) {
     }),
   );
 
-  // Static tail — gentle frozen wave, no animation
+  // Shorter tail — 5 segments flowing toward bottom-left
   let tx = diamond[2][0];
   let ty = diamond[2][1];
-  for (let i = 1; i <= 8; i++) {
-    const wave = Math.sin(i * 0.95) * 18;
-    const nx = tx + 14 + wave * 0.5;
-    const ny = ty + 22;
+  for (let i = 1; i <= 5; i++) {
+    const wave = Math.sin(i * 0.95) * 14;
+    const nx = tx - 20 + wave * 0.5; // going left
+    const ny = ty + 20;              // going down
     svg.appendChild(
       rc.line(tx, ty, nx, ny, {
         stroke: '#e84548',
