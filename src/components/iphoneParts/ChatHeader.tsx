@@ -12,8 +12,8 @@ export default function ChatHeader() {
 
       {/* Avatar + name */}
       <div className="flex flex-col items-center gap-[2px]">
-        <div className="w-7 h-7 rounded-full bg-[linear-gradient(135deg,#E8B55E_0%,#DC5A40_100%)] flex items-center justify-center text-[11px] font-semibold text-white font-sf">
-          K
+        <div className="w-7 h-7 rounded-full overflow-hidden">
+          <img src="/logo.png" alt="Kite" className="w-full h-full object-cover" />
         </div>
         <div className="flex flex-col items-center leading-tight">
           <span className="text-[11px] font-semibold text-white font-sf">Kite</span>
