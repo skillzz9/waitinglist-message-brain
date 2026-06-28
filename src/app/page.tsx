@@ -273,22 +273,22 @@ export default function Home() {
         width: 200,
         zIndex: 8,
       }}>
-        {/* Section 1 */}
+        {/* Section 1 — iMessage: text Kite */}
         <div style={{ ...textPanel, opacity: s1opacity, pointerEvents: s1opacity > 0.05 ? 'auto' : 'none' }}>
-          <h1 style={headingStyle}>If AI had a<br />phone number,</h1>
-          <p style={bodyStyle}>you&apos;d already be texting it. Kite is the AI that lives in your messages.</p>
+          <h1 style={headingStyle}>Just text<br />Kite,</h1>
+          <p style={bodyStyle}>Tell it about your day and how you feel. No apps to open — it lives right in your messages.</p>
         </div>
-        {/* Section 2 */}
+        {/* Section 2 — Dashboard: private score */}
         <div style={{ ...textPanel, opacity: s2opacity }}>
-          <h1 style={headingStyle}>Your day,<br />at a glance</h1>
-          <p style={bodyStyle}>Kite processes all your messages and surfaces what matters — every morning.</p>
+          <h1 style={headingStyle}>Your score,<br />privately.</h1>
+          <p style={bodyStyle}>Kite stores everything you share privately and builds a daily score that&apos;s completely unique to you.</p>
         </div>
-        {/* Section 3 */}
+        {/* Section 3 — Calendar: growth */}
         <div style={{ ...textPanel, opacity: s3opacity }}>
-          <h1 style={headingStyle}>Your week,<br />before it happens</h1>
-          <p style={bodyStyle}>Kite connects the dots across your conversations and keeps your calendar honest.</p>
+          <h1 style={headingStyle}>Grow every<br />day,</h1>
+          <p style={bodyStyle}>In the Kite app, see how your day went, revisit past days, and find ways to become a better version of yourself.</p>
         </div>
-        {/* Section 4 */}
+        {/* Section 4 — Reverse switch: reminders */}
         <div style={{ ...textPanel, opacity: s4opacity }}>
           <h1 style={headingStyle}>Nothing slips<br />through,</h1>
           <p style={bodyStyle}>Kite notices what matters and asks if you need a nudge — reminders delivered straight to iMessage.</p>
