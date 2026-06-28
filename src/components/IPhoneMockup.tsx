@@ -174,29 +174,33 @@ function TabBar({ active, theme = 'dark' }: { active: 'dashboard' | 'calendar'; 
 
 /* ─── dashboard screen ───────────────────────── */
 // All values scaled from mobile stylesheet at 273/390 ≈ 0.7
-function DashboardScreen() {
+function DashboardScreen({ active }: { active: boolean }) {
   const SKY        = '#f7eed5';
   const GROUND     = '#d4b87c';
   const DARK       = '#3a2010';
   const CARD_MID   = '#6b5a3e';
   const CARD_LIGHT = '#9a8a78';
 
-  // Animate score from 50 → 100 on mount, ease-out over 9 seconds, stays at 100
+  // Score animates 50→100 while visible, resets to 50 when scrolled away
   const [liveScore, setLiveScore] = useState(50);
   useEffect(() => {
+    if (!active) {
+      setLiveScore(50);
+      return;
+    }
     const start = performance.now();
     const DURATION = 9000;
     let raf: number;
     const tick = () => {
       const elapsed = performance.now() - start;
       const p = Math.min(1, elapsed / DURATION);
-      const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+      const eased = 1 - Math.pow(1 - p, 3);
       setLiveScore(Math.round(50 + eased * 50));
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [active]);
 
   const mood     = Math.round(liveScore * 0.88);
   const growth   = Math.round(liveScore * 0.92);
@@ -332,11 +336,11 @@ function CalendarScreen() {
 }
 
 /* ─── kite app wrapper (handles tab crossfade) ── */
-function KiteApp({ calendarProgress }: { calendarProgress: number }) {
+function KiteApp({ calendarProgress, dashboardActive }: { calendarProgress: number; dashboardActive: boolean }) {
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, opacity: 1 - calendarProgress }}>
-        <DashboardScreen />
+        <DashboardScreen active={dashboardActive} />
       </div>
       <div style={{ position: 'absolute', inset: 0, opacity: calendarProgress }}>
         <CalendarScreen />
@@ -802,7 +806,7 @@ export default function IPhoneMockup({
           opacity: finalKiteOpacity,
           ...(launchT < 0.95 || inReverse ? { boxShadow: '0 6px 28px rgba(0,0,0,0.8)' } : {}),
         }}>
-          <KiteApp calendarProgress={calendarProgress} />
+          <KiteApp calendarProgress={calendarProgress} dashboardActive={launchT >= 0.5} />
         </div>
 
       </div>
