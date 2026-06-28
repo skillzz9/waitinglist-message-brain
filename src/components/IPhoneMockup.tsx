@@ -19,6 +19,11 @@ const KiteScene = dynamic(
   }
 );
 
+const MeditateScreen = dynamic(
+  () => import('./iphoneParts/MeditateScreen'),
+  { ssr: false }
+);
+
 function makeOneShot(src: string, volume = 0.7) {
   if (typeof window === 'undefined') return () => {};
   const audio = new Audio(src);
@@ -648,6 +653,7 @@ export default function IPhoneMockup({
   const [userMessage,        setUserMessage]        = useState<string | null>(null);
   const [sendPhase,          setSendPhase]          = useState<SendPhase>('none');
   const [meditationNotifShow, setMeditationNotifShow] = useState(false);
+  const [meditateUIShow,      setMeditateUIShow]      = useState(false);
 
   // ── Forward app-switch animation (iMessage → Kite) ──
   const p = switcherProgress;
@@ -695,14 +701,35 @@ export default function IPhoneMockup({
   // Only go beige once the kite card is actually filling the screen (launchT for forward, 1-revEnterT for reverse)
   const kiteFullscreen = inReverse ? (1 - revEnterT) : launchT;
   // Both dashboard and calendar are beige — stay warm whenever Kite app is the top visible layer
-  const statusBarBlend = Math.max(0, Math.min(1, finalKiteOpacity * (1 - finalImsgOpacity) * kiteFullscreen));
+  let statusBarBlend = Math.max(0, Math.min(1, finalKiteOpacity * (1 - finalImsgOpacity) * kiteFullscreen));
+  
+  if (meditateUIShow) {
+    // When Meditate UI is visible, force it to beige, blending out if section 5 comes in
+    statusBarBlend = Math.max(statusBarBlend, 1 - section5Progress);
+  }
+
   const statusBarBg = `rgb(${Math.round(statusBarBlend * 247)},${Math.round(statusBarBlend * 238)},${Math.round(statusBarBlend * 213)})`;
   const statusBarDark = statusBarBlend > 0.5;
 
   // ── Meditation notification — hide when scrolled back or S5 starts ──
-  useEffect(() => { if (reverseProgress < 0.5) setMeditationNotifShow(false); }, [reverseProgress]);
-  useEffect(() => { if (section5Progress > 0.05) setMeditationNotifShow(false); }, [section5Progress]);
-  const handleMeditationNotifReady = useCallback(() => setMeditationNotifShow(true), []);
+  useEffect(() => { 
+    if (reverseProgress < 0.5) {
+      setMeditationNotifShow(false);
+      setMeditateUIShow(false);
+    }
+  }, [reverseProgress]);
+  useEffect(() => { 
+    if (section5Progress > 0.05) {
+      setMeditationNotifShow(false);
+      setMeditateUIShow(false);
+    }
+  }, [section5Progress]);
+  const handleMeditationNotifReady = useCallback(() => {
+    setMeditationNotifShow(true);
+    setTimeout(() => {
+      setMeditateUIShow(true);
+    }, 1500);
+  }, []);
 
   // ── Audio ──
   const tickHighRef   = useRef<(() => void) | null>(null);
@@ -807,7 +834,7 @@ export default function IPhoneMockup({
       <div className="absolute top-[8px] left-1/2 -translate-x-1/2 w-[80px] h-[20px] rounded-[10px] z-20" style={{ backgroundColor: '#1a1a1a' }}/>
 
       {/* Status bar — bg transitions to sky beige when dashboard fills screen; -1px overlap kills sub-pixel seam */}
-      <div className="relative z-20" style={{ backgroundColor: statusBarBg, marginBottom: -1 }}>
+      <div className="relative z-20" style={{ backgroundColor: statusBarBg, marginBottom: -1, transition: 'background-color 0.6s ease' }}>
         <StatusBar dark={statusBarDark} />
       </div>
 
@@ -845,6 +872,7 @@ export default function IPhoneMockup({
           <Keyboard pressedKey={pressedKey} />
           {/* Meditation chat (S4): fades in on reverse switch, animation triggers when fully visible */}
           <MeditationChat opacity={revLaunchT * (1 - section5Progress)} triggered={revLaunchT >= 0.95} onNotifReady={handleMeditationNotifReady} />
+          <MeditateScreen opacity={meditateUIShow ? (1 - section5Progress) : 0} />
           {/* Reminder chat (S5): crossfades in over the meditation chat */}
           <ReminderChat opacity={section5Progress} />
         </div>
@@ -867,7 +895,7 @@ export default function IPhoneMockup({
       </div>
 
       {/* S4 Kite App meditation banner — timer-driven, hides when S5 starts */}
-      <KiteNotificationBanner show={meditationNotifShow} />
+      <KiteNotificationBanner show={meditationNotifShow && !meditateUIShow} />
       {/* S5 iMessage reminder banner */}
       <NotificationBanner progress={meditationNotifProgress} />
     </div>
