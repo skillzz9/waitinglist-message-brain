@@ -271,26 +271,4 @@ function renderSkyOverlay(rootSvg: SVGSVGElement, rc: RoughSVG, t: number, boilT
     }));
   });
 
-  // ── Birds: scribbly roughjs lines matching the cloud aesthetic ──────────
-  // [startX, y, count, spread, pxPerSec]
-  const flockDefs: [number, number, number, number, number][] = [
-    [220,  90, 3, 55, 22],
-    [850, 185, 4, 45, 16],
-  ];
-  flockDefs.forEach(([bx, by, count, spread, spd], fi) => {
-    const groupX = ((bx + t * spd) % 1500 + 1500) % 1500 - 180;
-    for (let bi = 0; bi < count; bi++) {
-      const birdX = groupX + (bi - (count - 1) / 2) * spread;
-      const birdY = by + Math.sin(t * 1.2 + bi * 1.1 + fi * 1.5) * 8;
-      const flap  = Math.sin(t * 5.5 + bi * 1.3 + fi * 2.2) * 9;
-      const ws = 24;
-      const vy = ws * 0.4;
-      svg.appendChild(rc.line(birdX, birdY, birdX - ws, birdY - vy - flap, {
-        stroke: '#3a2818', strokeWidth: 2, roughness: 2.8, seed: seed(fi * 20 + bi * 3 + 200),
-      }));
-      svg.appendChild(rc.line(birdX, birdY, birdX + ws, birdY - vy - flap, {
-        stroke: '#3a2818', strokeWidth: 2, roughness: 2.8, seed: seed(fi * 20 + bi * 3 + 201),
-      }));
-    }
-  });
 }

@@ -796,18 +796,20 @@ export default function IPhoneMockup({
           <ReminderChat opacity={section5Progress} />
         </div>
 
-        {/* Kite daily summary card */}
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 1,
-          transform: `translateX(${finalKiteX}px) scale(${finalKiteScale})`,
-          transformOrigin: 'center center',
-          borderRadius: finalKiteRadius,
-          overflow: 'hidden',
-          opacity: finalKiteOpacity,
-          ...(launchT < 0.95 || inReverse ? { boxShadow: '0 6px 28px rgba(0,0,0,0.8)' } : {}),
-        }}>
-          <KiteApp calendarProgress={calendarProgress} dashboardActive={launchT >= 0.5} />
-        </div>
+        {/* Kite daily summary card — only mount once visible to avoid corner artifact on first load */}
+        {finalKiteOpacity > 0 && (
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 1,
+            transform: `translateX(${finalKiteX}px) scale(${finalKiteScale})`,
+            transformOrigin: 'center center',
+            borderRadius: finalKiteRadius,
+            overflow: 'hidden',
+            opacity: finalKiteOpacity,
+            ...(launchT < 0.95 || inReverse ? { boxShadow: '0 6px 28px rgba(0,0,0,0.8)' } : {}),
+          }}>
+            <KiteApp calendarProgress={calendarProgress} dashboardActive={launchT >= 0.5} />
+          </div>
+        )}
 
       </div>
 
