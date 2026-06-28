@@ -12,15 +12,22 @@ type WaitlistStatus = 'idle' | 'loading' | 'success' | 'error' | 'duplicate' | '
 function WaitlistCTA() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<WaitlistStatus>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
   const disabled = status === 'loading' || status === 'success';
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (disabled) return;
     setStatus('loading');
+    setErrorMessage('');
     const result = await addToWaitlist(email);
     if (result.ok) setStatus('success');
-    else setStatus(result.reason);
+    else {
+      setStatus(result.reason);
+      if ('message' in result && result.message) {
+        setErrorMessage(result.message);
+      }
+    }
   };
 
   const statusText: Record<WaitlistStatus, string> = {
@@ -118,7 +125,7 @@ function WaitlistCTA() {
           </svg>
         )}
         <span style={{ fontSize: 12, color: statusColor, letterSpacing: '0.01em' }}>
-          {statusText[status]}
+          {errorMessage || statusText[status]}
         </span>
       </div>
     </form>

@@ -14,7 +14,7 @@ const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseCon
 
 export const db = getFirestore(app);
 
-export async function addToWaitlist(email: string): Promise<{ ok: true } | { ok: false; reason: 'invalid' | 'duplicate' | 'error' }> {
+export async function addToWaitlist(email: string): Promise<{ ok: true } | { ok: false; reason: 'invalid' | 'duplicate' | 'error'; message?: string }> {
   const trimmed = email.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
     return { ok: false, reason: 'invalid' };
@@ -34,6 +34,6 @@ export async function addToWaitlist(email: string): Promise<{ ok: true } | { ok:
       return { ok: false, reason: 'duplicate' };
     }
     console.error('addToWaitlist failed', err);
-    return { ok: false, reason: 'error' };
+    return { ok: false, reason: 'error', message: err instanceof Error ? err.message : String(err) };
   }
 }
