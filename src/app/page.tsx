@@ -147,16 +147,16 @@ export default function Home() {
       const sy = window.scrollY;
       // Forward switch: iMessage → Kite (0 → 1.5vh)
       setScrollProgress(Math.min(1, Math.max(0, sy / (vh * 1.5))));
-      // Calendar tab crossfade (3.5vh → 4.3vh)
-      setCalendarProgress(Math.min(1, Math.max(0, (sy - vh * 3.5) / (vh * 0.8))));
-      // Reverse switch: Kite → iMessage (4.4vh → 5.4vh, right after calendar)
-      setReverseProgress(Math.min(1, Math.max(0, (sy - vh * 4.4) / vh)));
-      // Notification banner slide-in (5.6vh → 6.0vh)
-      setNotificationProgress(Math.min(1, Math.max(0, (sy - vh * 5.6) / (vh * 0.4))));
-      // Section 5: meditation chat crossfade (6.5vh → 7.2vh)
-      setSection5Progress(Math.min(1, Math.max(0, (sy - vh * 6.5) / (vh * 0.7))));
-      // Kite App meditation notification (7.8vh → 8.2vh)
-      setMeditationNotifProgress(Math.min(1, Math.max(0, (sy - vh * 7.8) / (vh * 0.4))));
+      // Calendar tab crossfade (2.2vh → 3.0vh)
+      setCalendarProgress(Math.min(1, Math.max(0, (sy - vh * 2.2) / (vh * 0.8))));
+      // Reverse switch: Kite → iMessage (3.1vh → 4.1vh, right after calendar)
+      setReverseProgress(Math.min(1, Math.max(0, (sy - vh * 3.1) / vh)));
+      // Notification banner slide-in (4.3vh → 4.7vh)
+      setNotificationProgress(Math.min(1, Math.max(0, (sy - vh * 4.3) / (vh * 0.4))));
+      // Section 5: meditation chat crossfade (5.2vh → 5.9vh)
+      setSection5Progress(Math.min(1, Math.max(0, (sy - vh * 5.2) / (vh * 0.7))));
+      // Kite App meditation notification (6.5vh → 6.9vh)
+      setMeditationNotifProgress(Math.min(1, Math.max(0, (sy - vh * 6.5) / (vh * 0.4))));
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -289,7 +289,7 @@ export default function Home() {
       </div>
 
       {/* Scrollable spacer — just provides scroll height, no visible content */}
-      <div style={{ position: 'relative', zIndex: 5, minHeight: '1050vh' }} />
+      <div style={{ position: 'relative', zIndex: 5, minHeight: '850vh' }} />
     </>
   );
 }
