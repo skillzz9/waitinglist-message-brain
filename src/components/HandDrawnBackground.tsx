@@ -249,16 +249,18 @@ function renderMobileSun(svg: SVGSVGElement, rc: RoughSVG, boilTick: number) {
   }
 }
 
-// ── Animated clouds + bird formations on the solid beige background ──────────
+// ── Animated overlay: clouds (top + mid), smooth birds, rolling hills ────────
 function renderSkyOverlay(rootSvg: SVGSVGElement, rc: RoughSVG, t: number, boilTick: number) {
   const svg  = makeMirror(rootSvg);
   const seed = (o = 0) => ((boilTick + o) % 6) + 1;
 
-  // 3 clouds at different heights, sizes, and drift speeds (px/sec in viewBox)
+  // ── Clouds: top layer (3) + middle layer (2) ─────────────────────────────
   const cloudDefs: [number, number, number, number, number][] = [
-    [130,  64, 130, 36, 12],   // [startX, y, w, h, pxPerSec]
-    [570, 108, 104, 29,  8],
-    [1020,  50, 148, 42, 15],
+    [130,  62, 130, 36, 12],   // top — fast
+    [570, 105, 104, 29,  8],
+    [1020,  48, 148, 42, 15],
+    [320,  240, 115, 30,  5],  // mid — slow
+    [820,  278,  88, 24,  7],
   ];
   cloudDefs.forEach(([bx, by, cw, ch, spd], i) => {
     const x = ((bx + t * spd) % 1300 + 1300) % 1300 - 200;
@@ -269,38 +271,51 @@ function renderSkyOverlay(rootSvg: SVGSVGElement, rc: RoughSVG, t: number, boilT
     }));
   });
 
-  // Bird formations — groups of 3–4, V-shape scribble wings with flapping
+  // ── Rolling hills at bottom — two layers, very slow ──────────────────────
+  // Back hills: tall, muted sage, slower
+  const backScroll = (t * 3.5) % 450;
+  for (let i = -1; i < 4; i++) {
+    const x = i * 450 + backScroll;
+    svg.appendChild(rc.path(
+      `M ${x} 520 Q ${x + 225} 355 ${x + 450} 520`,
+      { stroke: '#9aad7a', strokeWidth: 2, fill: '#abbe88', fillStyle: 'solid', roughness: 2.2, seed: seed(i + 150) },
+    ));
+  }
+  // Front hills: lower profile, warmer green, slightly faster
+  const frontScroll = (t * 5) % 380;
+  for (let i = -1; i < 5; i++) {
+    const x = i * 380 + frontScroll;
+    svg.appendChild(rc.path(
+      `M ${x} 520 Q ${x + 190} 418 ${x + 380} 520`,
+      { stroke: '#7a8a5a', strokeWidth: 2, fill: '#8a9a68', fillStyle: 'solid', roughness: 2.0, seed: seed(i + 160) },
+    ));
+  }
+
+  // ── Birds: smooth gull-shape bezier wings ────────────────────────────────
   // [startX, y, count, spread, pxPerSec]
   const flockDefs: [number, number, number, number, number][] = [
-    [220,  130, 4, 44, 30],
-    [780,   72, 3, 50, 22],
-    [1180, 158, 4, 40, 26],
+    [220,  90, 3, 55, 22],
+    [850, 185, 4, 45, 16],
   ];
-
   flockDefs.forEach(([bx, by, count, spread, spd], fi) => {
     const groupX = ((bx + t * spd) % 1500 + 1500) % 1500 - 180;
     for (let bi = 0; bi < count; bi++) {
       const birdX = groupX + (bi - (count - 1) / 2) * spread;
-      const birdY = by + Math.sin(t * 1.4 + bi * 0.9 + fi * 1.8) * 9;
-      const flap  = Math.sin(t * 7.5 + bi * 1.2 + fi * 2.5) * 9;
-      // Slight position jitter from boil cycle for scribble feel
-      const jit   = (boilTick % 3 - 1) * 0.9;
+      const birdY = by + Math.sin(t * 1.2 + bi * 1.1 + fi * 1.5) * 8;
+      const flap  = Math.sin(t * 5.5 + bi * 1.3 + fi * 2.2); // -1 to 1
+      const ws    = 26;
+      const h     = ws * (0.38 + flap * 0.18); // arc height varies with flap phase
 
-      const ws = 22;
-      const vy = ws * 0.42;
-
-      // Left wing
       const lp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      lp.setAttribute('d', `M ${birdX} ${birdY} L ${birdX - ws + jit * 0.4} ${birdY - vy - flap + jit}`);
+      lp.setAttribute('d', `M ${birdX} ${birdY} Q ${birdX - ws * 0.5} ${birdY - h * 1.5} ${birdX - ws} ${birdY - h * 0.3}`);
       lp.setAttribute('stroke', '#3a2818');
       lp.setAttribute('stroke-width', '2');
       lp.setAttribute('stroke-linecap', 'round');
       lp.setAttribute('fill', 'none');
       svg.appendChild(lp);
 
-      // Right wing
       const rp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      rp.setAttribute('d', `M ${birdX} ${birdY} L ${birdX + ws - jit * 0.4} ${birdY - vy - flap - jit}`);
+      rp.setAttribute('d', `M ${birdX} ${birdY} Q ${birdX + ws * 0.5} ${birdY - h * 1.5} ${birdX + ws} ${birdY - h * 0.3}`);
       rp.setAttribute('stroke', '#3a2818');
       rp.setAttribute('stroke-width', '2');
       rp.setAttribute('stroke-linecap', 'round');
