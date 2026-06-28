@@ -264,73 +264,125 @@ function DashboardScreen({ active }: { active: boolean }) {
 }
 
 /* ─── calendar screen ────────────────────────── */
+// All sizes scaled from mobile stylesheet at 273/390 ≈ 0.7
 function CalendarScreen() {
-  const days = ['S','M','T','W','T','F','S'];
-  const weeks = [
-    [null,null,1,2,3,4,5],
-    [6,7,8,9,10,11,12],
-    [13,14,15,16,17,18,19],
-    [20,21,22,23,24,25,26],
-    [27,28,29,30,null,null,null],
+  const SKY  = '#f7eed5';
+  const DARK = '#3a2010';
+  const BLUE = '#3a5a88';
+
+  const dayLabels = ['S','M','T','W','T','F','S'];
+  // June 2026: starts on Tuesday (firstDay=2)
+  const cells: (number | null)[] = [
+    null, null, 1, 2, 3, 4, 5,
+    6, 7, 8, 9, 10, 11, 12,
+    13, 14, 15, 16, 17, 18, 19,
+    20, 21, 22, 23, 24, 25, 26,
+    27, 28, 29, 30, null, null, null,
   ];
-  const today = 27;
-  const events = [
-    { day: 27, label: 'Morning check-in', color: '#E8B55E' },
-    { day: 28, label: 'Focus block',       color: '#DC5A40' },
-    { day: 30, label: 'Weekly review',     color: '#7B8FE8' },
-  ];
+  const today    = 28;
+  const selected = 28;
+  const entries  = new Set([5, 9, 12, 15, 18, 21, 24, 26, 27, 28]);
+
+  const glassCard: React.CSSProperties = {
+    background: 'rgba(255,255,255,0.22)',
+    backdropFilter: 'blur(18px)',
+    WebkitBackdropFilter: 'blur(18px)',
+    border: '1px solid rgba(255,255,255,0.35)',
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginBottom: 8,
+  };
+
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', ...SF, background: '#0e0e14' }}>
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '14px 16px 0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 1 }}>2026</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: 'white' }}>June</div>
-          </div>
-          <div style={{ display: 'flex', gap: 6 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'white', fontSize: 12 }}>‹</span>
-            </div>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'white', fontSize: 12 }}>›</span>
-            </div>
-          </div>
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', ...SF, backgroundColor: SKY }}>
+
+      {/* Scrollable content */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+
+        {/* Heading */}
+        <div style={{ paddingTop: 8, paddingBottom: 3, paddingLeft: 14, paddingRight: 14 }}>
+          <div style={{ fontSize: 24, fontWeight: 700, color: DARK }}>Calendar</div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: 6 }}>
-          {days.map((d, i) => (
-            <div key={i} style={{ textAlign: 'center', fontSize: 9, color: 'rgba(255,255,255,0.3)', fontWeight: 600, letterSpacing: '0.05em' }}>{d}</div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 12 }}>
-          {weeks.map((week, wi) => (
-            <div key={wi} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
-              {week.map((day, di) => (
-                <div key={di} style={{
-                  height: 28, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: day === today ? '#E8B55E' : 'transparent',
-                }}>
-                  <span style={{ fontSize: 11, fontWeight: day === today ? 700 : 400, color: day === today ? '#000' : day ? 'rgba(255,255,255,0.75)' : 'transparent' }}>
-                    {day ?? '·'}
-                  </span>
+
+        {/* Calendar section */}
+        <div style={{ paddingLeft: 11, paddingRight: 11, paddingTop: 8, flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+
+          {/* Calendar card */}
+          <div style={glassCard}>
+            {/* Month nav */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 13px 7px' }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: DARK }}>June 2026</div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <span style={{ fontSize: 16, color: DARK, opacity: 0.4, lineHeight: 1 }}>‹</span>
+                <span style={{ fontSize: 16, color: DARK, opacity: 0.4, lineHeight: 1 }}>›</span>
+              </div>
+            </div>
+
+            {/* Day headers */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', paddingLeft: 7, paddingRight: 7, marginBottom: 5 }}>
+              {dayLabels.map((d, i) => (
+                <div key={i} style={{ textAlign: 'center', fontSize: 8, color: 'rgba(58,32,16,0.45)', fontWeight: 600, letterSpacing: '0.05em' }}>{d}</div>
+              ))}
+            </div>
+
+            {/* Calendar grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, paddingLeft: 7, paddingRight: 7, paddingBottom: 10 }}>
+              {cells.map((day, i) => {
+                if (!day) return <div key={i} style={{ aspectRatio: '1' }} />;
+                const isSel = day === selected;
+                const isToday = day === today;
+                const hasEntry = entries.has(day);
+                return (
+                  <div key={i} style={{ aspectRatio: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                    <div style={{
+                      width: 24, height: 24, borderRadius: 7,
+                      backgroundColor: isSel ? BLUE : 'transparent',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: isSel || isToday ? 700 : 400,
+                        color: isSel ? '#fff' : isToday ? BLUE : 'rgba(58,32,16,0.85)',
+                      }}>{day}</span>
+                    </div>
+                    {hasEntry && !isSel && (
+                      <div style={{ width: 3.5, height: 3.5, borderRadius: 2, backgroundColor: BLUE, position: 'absolute', bottom: 1 }} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Selected day detail card */}
+          <div style={{ ...glassCard, padding: '9px 11px' }}>
+            <div style={{ fontSize: 7.5, fontWeight: 600, letterSpacing: '0.08em', color: 'rgba(58,32,16,0.5)', marginBottom: 9, textTransform: 'uppercase' }}>
+              Sunday, 28 June
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
+              <span style={{ fontSize: 20 }}>😊</span>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: DARK, lineHeight: '15px' }}>A good day overall</div>
+                <div style={{ fontSize: 8, color: 'rgba(58,32,16,0.55)', marginTop: 2 }}>3 messages · positive</div>
+              </div>
+            </div>
+            <div style={{ fontSize: 9.5, lineHeight: '14px', color: 'rgba(58,32,16,0.75)', marginBottom: 8 }}>
+              Reflected on your goals and felt grounded. Made real progress on staying focused today.
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+              {['mindfulness', 'growth', 'goals'].map((t) => (
+                <div key={t} style={{ borderRadius: 6, paddingLeft: 7, paddingRight: 7, paddingTop: 3, paddingBottom: 3, backgroundColor: 'rgba(58,32,16,0.08)' }}>
+                  <span style={{ fontSize: 8.5, fontWeight: 500, color: '#8a6a3e' }}>{t}</span>
                 </div>
               ))}
             </div>
-          ))}
-        </div>
-        <div style={{ fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>Upcoming</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {events.map((ev, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: '8px 10px' }}>
-              <div style={{ width: 3, height: 28, borderRadius: 2, background: ev.color, flexShrink: 0 }} />
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: 'white' }}>{ev.label}</div>
-                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', marginTop: 1 }}>Jun {ev.day}</div>
-              </div>
-            </div>
-          ))}
+          </div>
+
         </div>
       </div>
-      <TabBar active="calendar" />
+
+      <TabBar active="calendar" theme="warm" />
+      <div style={{ backgroundColor: '#d4b87c', height: 18, flexShrink: 0 }} />
     </div>
   );
 }
@@ -642,7 +694,8 @@ export default function IPhoneMockup({
   // Status bar: blend toward beige sky when dashboard is the top visible layer
   // Only go beige once the kite card is actually filling the screen (launchT for forward, 1-revEnterT for reverse)
   const kiteFullscreen = inReverse ? (1 - revEnterT) : launchT;
-  const statusBarBlend = Math.max(0, Math.min(1, finalKiteOpacity * (1 - finalImsgOpacity) * (1 - calendarProgress) * kiteFullscreen));
+  // Both dashboard and calendar are beige — stay warm whenever Kite app is the top visible layer
+  const statusBarBlend = Math.max(0, Math.min(1, finalKiteOpacity * (1 - finalImsgOpacity) * kiteFullscreen));
   const statusBarBg = `rgb(${Math.round(statusBarBlend * 247)},${Math.round(statusBarBlend * 238)},${Math.round(statusBarBlend * 213)})`;
   const statusBarDark = statusBarBlend > 0.5;
 
