@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import StatusBar      from './iphoneParts/StatusBar';
 import ChatHeader     from './iphoneParts/ChatHeader';
 import MessageBubbles from './iphoneParts/MessageBubbles';
@@ -240,6 +240,156 @@ function ReminderChat({ opacity }: { opacity: number }) {
   );
 }
 
+/* ─── meditation chat (section 4) — animated ─── */
+type MeditationPhase = 'idle' | 'typing' | 'sent' | 'kite-typing' | 'kite-replied';
+
+function MeditationChat({ opacity, triggered, onNotifReady }: { opacity: number; triggered: boolean; onNotifReady: () => void }) {
+  const [typedText, setTypedText]   = useState('');
+  const [pressedKey, setPressedKey] = useState<string | null>(null);
+  const [phase, setPhase]           = useState<MeditationPhase>('idle');
+  const hasStartedRef               = useRef(false);
+  const timersRef                   = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearAllTimers = useCallback(() => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  }, []);
+
+  useEffect(() => () => clearAllTimers(), [clearAllTimers]);
+
+  const fullMessage = useMemo(() => "Hey I'm not feeling too well", []);
+
+  useEffect(() => {
+    if (!triggered || hasStartedRef.current) return;
+    hasStartedRef.current = true;
+    setPhase('typing');
+
+    fullMessage.split('').forEach((char, i) => {
+      const delay = 400 + i * 60;
+      const k = char === ' ' ? 'space' : char.toLowerCase();
+      timersRef.current.push(
+        setTimeout(() => { setPressedKey(k); setTypedText(fullMessage.slice(0, i + 1)); }, delay),
+        setTimeout(() => setPressedKey(null), delay + 90),
+      );
+    });
+
+    const totalMs = 400 + fullMessage.length * 60;
+    timersRef.current.push(
+      setTimeout(() => { setTypedText(''); setPhase('sent'); }, totalMs + 300),
+      setTimeout(() => setPhase('kite-typing'), totalMs + 900),
+      setTimeout(() => setPhase('kite-replied'), totalMs + 2400),
+      setTimeout(onNotifReady, totalMs + 3200),
+    );
+  }, [triggered, fullMessage]);
+
+  // Reset when scrolled back out
+  useEffect(() => {
+    if (opacity < 0.01 && hasStartedRef.current) {
+      clearAllTimers();
+      hasStartedRef.current = false;
+      setPhase('idle');
+      setTypedText('');
+      setPressedKey(null);
+    }
+  }, [opacity, clearAllTimers]);
+
+  if (opacity <= 0) return null;
+
+  const showKeyboard   = phase === 'idle' || phase === 'typing';
+  const showUserBubble = phase === 'sent' || phase === 'kite-typing' || phase === 'kite-replied';
+  const showKiteTyping = phase === 'kite-typing';
+  const showKiteReply  = phase === 'kite-replied';
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: '#000', opacity, display: 'flex', flexDirection: 'column', zIndex: 11, ...SF }}>
+      <ChatHeader />
+
+      {/* Message area */}
+      <div style={{ flex: 1, padding: '14px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: 10, overflow: 'hidden' }}>
+        {showUserBubble && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ maxWidth: '78%', background: '#0084FF', borderRadius: '18px 18px 4px 18px', padding: '9px 13px' }}>
+              <span style={{ fontSize: 12.5, color: 'white', lineHeight: 1.45 }}>Hey I&apos;m not feeling too well</span>
+            </div>
+          </div>
+        )}
+        {showKiteTyping && (
+          <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+            <div style={{ background: '#1C1C1E', borderRadius: '4px 18px 18px 18px', padding: '11px 14px', display: 'flex', gap: 4, alignItems: 'center' }}>
+              {[0, 1, 2].map(i => (
+                <div key={i} className="w-1.5 h-1.5 rounded-full bg-white/50 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+              ))}
+            </div>
+          </div>
+        )}
+        {showKiteReply && (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+              <div style={{ maxWidth: '78%', background: '#1C1C1E', borderRadius: '4px 18px 18px 18px', padding: '9px 13px' }}>
+                <span style={{ fontSize: 12.5, color: 'white', lineHeight: 1.45 }}>I set up a meditation for you. 🧘 Take a moment for yourself.</span>
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: -6 }}>Delivered</div>
+          </>
+        )}
+      </div>
+
+      {/* Input bar + optional keyboard */}
+      {showKeyboard ? (
+        <>
+          <InputBar text={typedText} />
+          <Keyboard pressedKey={pressedKey} />
+        </>
+      ) : (
+        <div style={{ paddingBottom: 22 }}>
+          <InputBar text="" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Kite app notification banner (section 4) ── */
+function KiteNotificationBanner({ show }: { show: boolean }) {
+  const hasShownRef = useRef(false);
+  if (show) hasShownRef.current = true;
+  if (!hasShownRef.current) return null;
+  return (
+    <div style={{
+      position: 'absolute', left: 8, right: 8, zIndex: 51,
+      top: show ? 48 : -100,
+      transition: 'top 0.45s cubic-bezier(0.32, 0.72, 0, 1)',
+      background: 'rgba(28,28,30,0.94)',
+      backdropFilter: 'blur(20px)',
+      borderRadius: 14,
+      padding: '10px 12px',
+      display: 'flex', alignItems: 'center', gap: 10,
+      boxShadow: '0 4px 24px rgba(0,0,0,0.7)',
+      border: '0.5px solid rgba(255,255,255,0.12)',
+      ...SF,
+    }}>
+      {/* Kite app icon — orange gradient K */}
+      <div style={{
+        width: 36, height: 36, borderRadius: 9,
+        background: 'linear-gradient(135deg, #E8B55E 0%, #DC5A40 100%)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+        fontSize: 18, fontWeight: 700, color: 'white',
+        fontFamily: '-apple-system, system-ui, sans-serif',
+      }}>
+        K
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 1 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>Kite</span>
+          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>now</span>
+        </div>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', lineHeight: 1.3 }}>🧘 I&apos;ve set up a meditation for you</div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── iOS-style notification banner ─────────── */
 function NotificationBanner({ progress }: { progress: number }) {
   if (progress <= 0) return null;
@@ -287,17 +437,22 @@ export default function IPhoneMockup({
   calendarProgress = 0,
   reverseProgress = 0,
   notificationProgress = 0,
+  section5Progress = 0,
+  meditationNotifProgress = 0,
 }: {
   switcherProgress?: number;
   calendarProgress?: number;
   reverseProgress?: number;
   notificationProgress?: number;
+  section5Progress?: number;
+  meditationNotifProgress?: number;
 }) {
-  const [pressedKey,   setPressedKey]   = useState<string | null>(null);
-  const [typedText,    setTypedText]    = useState('');
-  const [welcomePhase, setWelcomePhase] = useState<'typing' | 'shown'>('typing');
-  const [userMessage,  setUserMessage]  = useState<string | null>(null);
-  const [sendPhase,    setSendPhase]    = useState<SendPhase>('none');
+  const [pressedKey,         setPressedKey]         = useState<string | null>(null);
+  const [typedText,          setTypedText]          = useState('');
+  const [welcomePhase,       setWelcomePhase]       = useState<'typing' | 'shown'>('typing');
+  const [userMessage,        setUserMessage]        = useState<string | null>(null);
+  const [sendPhase,          setSendPhase]          = useState<SendPhase>('none');
+  const [meditationNotifShow, setMeditationNotifShow] = useState(false);
 
   // ── Forward app-switch animation (iMessage → Kite) ──
   const p = switcherProgress;
@@ -338,6 +493,11 @@ export default function IPhoneMockup({
 
   // During reverse: bg stays at 1 through enter+swipe, fades as iMessage launches
   const finalBgOpacity   = inReverse ? Math.max(0, 1 - revLaunchT) : bgOpacity;
+
+  // ── Meditation notification — hide when scrolled back or S5 starts ──
+  useEffect(() => { if (reverseProgress < 0.5) setMeditationNotifShow(false); }, [reverseProgress]);
+  useEffect(() => { if (section5Progress > 0.05) setMeditationNotifShow(false); }, [section5Progress]);
+  const handleMeditationNotifReady = useCallback(() => setMeditationNotifShow(true), []);
 
   // ── Audio ──
   const tickHighRef   = useRef<(() => void) | null>(null);
@@ -478,8 +638,10 @@ export default function IPhoneMockup({
           />
           <InputBar text={typedText} />
           <Keyboard pressedKey={pressedKey} />
-          {/* Reminder conversation fades in as iMessage launches during reverse switch */}
-          <ReminderChat opacity={revLaunchT} />
+          {/* Meditation chat (S4): fades in on reverse switch, animation triggers when fully visible */}
+          <MeditationChat opacity={revLaunchT * (1 - section5Progress)} triggered={revLaunchT >= 0.95} onNotifReady={handleMeditationNotifReady} />
+          {/* Reminder chat (S5): crossfades in over the meditation chat */}
+          <ReminderChat opacity={section5Progress} />
         </div>
 
         {/* Kite daily summary card */}
@@ -497,8 +659,10 @@ export default function IPhoneMockup({
 
       </div>
 
-      {/* iOS notification banner — slides down from top of phone screen */}
-      <NotificationBanner progress={notificationProgress} />
+      {/* S4 Kite App meditation banner — timer-driven, hides when S5 starts */}
+      <KiteNotificationBanner show={meditationNotifShow} />
+      {/* S5 iMessage reminder banner */}
+      <NotificationBanner progress={meditationNotifProgress} />
     </div>
 
     {/* Phone border overlay — sibling outside overflow:hidden so it's always on top */}

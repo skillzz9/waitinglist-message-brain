@@ -133,6 +133,8 @@ export default function Home() {
   const [calendarProgress, setCalendarProgress] = useState(0);
   const [reverseProgress, setReverseProgress] = useState(0);
   const [notificationProgress, setNotificationProgress] = useState(0);
+  const [section5Progress, setSection5Progress] = useState(0);
+  const [meditationNotifProgress, setMeditationNotifProgress] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const targetRef = useRef({ x: 0, y: 0 });
   const currentRef = useRef({ x: 0, y: 0 });
@@ -199,6 +201,10 @@ export default function Home() {
       setReverseProgress(Math.min(1, Math.max(0, (sy - vh * 4.4) / vh)));
       // Notification banner slide-in (5.6vh → 6.0vh)
       setNotificationProgress(Math.min(1, Math.max(0, (sy - vh * 5.6) / (vh * 0.4))));
+      // Section 5: meditation chat crossfade (6.5vh → 7.2vh)
+      setSection5Progress(Math.min(1, Math.max(0, (sy - vh * 6.5) / (vh * 0.7))));
+      // Kite App meditation notification (7.8vh → 8.2vh)
+      setMeditationNotifProgress(Math.min(1, Math.max(0, (sy - vh * 7.8) / (vh * 0.4))));
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -225,7 +231,8 @@ export default function Home() {
   const s1opacity = Math.max(0, 1 - scrollProgress / 0.25);
   const s2opacity = Math.min(1, Math.max(0, (scrollProgress - 0.7) / 0.25)) * (1 - calendarProgress);
   const s3opacity = calendarProgress * (1 - reverseProgress);
-  const s4opacity = reverseProgress;
+  const s4opacity = reverseProgress * (1 - section5Progress);
+  const s5opacity = section5Progress;
 
   const textPanel: React.CSSProperties = {
     position: 'absolute',
@@ -275,8 +282,13 @@ export default function Home() {
           <h1 style={headingStyle}>Grow every<br />day,</h1>
           <p style={bodyStyle}>In the Kite app, see how your day went, revisit past days, and find ways to become a better version of yourself.</p>
         </div>
-        {/* Section 4 — Reverse switch: reminders */}
+        {/* Section 4 — Reverse switch: meditation */}
         <div style={{ ...textPanel, opacity: s4opacity }}>
+          <h1 style={headingStyle}>There when<br />it counts,</h1>
+          <p style={bodyStyle}>Just tell Kite how you&apos;re feeling. It quietly sets things up in the app to look after you.</p>
+        </div>
+        {/* Section 5 — Reminders */}
+        <div style={{ ...textPanel, opacity: s5opacity }}>
           <h1 style={headingStyle}>Nothing slips<br />through,</h1>
           <p style={bodyStyle}>Kite notices what matters and asks if you need a nudge — reminders delivered straight to iMessage.</p>
         </div>
@@ -319,11 +331,13 @@ export default function Home() {
           calendarProgress={calendarProgress}
           reverseProgress={reverseProgress}
           notificationProgress={notificationProgress}
+          section5Progress={section5Progress}
+          meditationNotifProgress={meditationNotifProgress}
         />
       </div>
 
       {/* Scrollable spacer — just provides scroll height, no visible content */}
-      <div style={{ position: 'relative', zIndex: 5, minHeight: '800vh' }} />
+      <div style={{ position: 'relative', zIndex: 5, minHeight: '1050vh' }} />
     </>
   );
 }
