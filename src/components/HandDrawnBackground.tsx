@@ -10,7 +10,7 @@ const GROUND_Y = 410;
 const SCROLL_SPEED = 18;
 const BOIL_MS = 100;
 
-export default function HandDrawnBackground() {
+export default function HandDrawnBackground({ scrollProgress = 0 }: { scrollProgress?: number }) {
   const bgRef = useRef<SVGSVGElement>(null);
   const dskSunRef = useRef<SVGSVGElement>(null);
   const sunRef = useRef<SVGSVGElement>(null);
@@ -54,40 +54,61 @@ export default function HandDrawnBackground() {
     return () => cancelAnimationFrame(frame);
   }, []);
 
+  // Smooth zoom with a subtle anticipation bounce — the scene dips ~4% smaller in the
+  // first 20% of scroll (sin half-wave), then the cubic ease-in carries it all the
+  // way up to a solid beige fill at p=1.
+  const dipEnd = 0.2;
+  const dip = scrollProgress < dipEnd
+    ? -0.04 * Math.sin((Math.PI * scrollProgress) / dipEnd)
+    : 0;
+  const scale = 1 + dip + Math.pow(scrollProgress, 3) * 5;
+
   return (
     <div
       className="fixed inset-0 overflow-hidden pointer-events-none"
       style={{ zIndex: 0, background: 'linear-gradient(180deg, #f5e8cf 0%, #ecd7ad 55%, #d9c290 100%)' }}
     >
-      <svg
-        ref={bgRef}
-        viewBox={`0 0 ${W} ${H}`}
-        preserveAspectRatio="xMidYMid slice"
-        className="absolute inset-0 w-full h-full block"
-      />
-      <svg
-        ref={dskSunRef}
-        viewBox={`0 0 ${W} ${H}`}
-        preserveAspectRatio="xMidYMid slice"
-        className="absolute inset-0 w-full h-full block hidden md:block"
-      />
-      <svg
-        ref={sunRef}
-        viewBox="0 0 200 200"
-        className="absolute top-3 left-3 sm:top-5 sm:left-5 w-20 sm:w-24 h-auto md:hidden"
-      />
-      <svg
-        ref={cloudRef}
-        viewBox={`0 0 ${W} ${H}`}
-        preserveAspectRatio="xMidYMid slice"
-        className="absolute inset-0 w-full h-full block"
-      />
-      <svg
-        ref={fgRef}
-        viewBox={`0 0 ${W} ${H}`}
-        preserveAspectRatio="xMidYMid slice"
-        className="absolute inset-0 w-full h-full block"
-      />
+      <div
+        className="absolute"
+        style={{
+          // Oversized by 8% on every side so the bounce-dip (which can drop scale
+          // to ~0.96) still keeps the SVG content covering the full viewport.
+          inset: '-8%',
+          transform: `scale(${scale})`,
+          transformOrigin: '50% 35%',
+          willChange: 'transform',
+        }}
+      >
+        <svg
+          ref={bgRef}
+          viewBox={`0 0 ${W} ${H}`}
+          preserveAspectRatio="xMidYMid slice"
+          className="absolute inset-0 w-full h-full block"
+        />
+        <svg
+          ref={dskSunRef}
+          viewBox={`0 0 ${W} ${H}`}
+          preserveAspectRatio="xMidYMid slice"
+          className="absolute inset-0 w-full h-full block hidden md:block"
+        />
+        <svg
+          ref={sunRef}
+          viewBox="0 0 200 200"
+          className="absolute top-3 left-3 sm:top-5 sm:left-5 w-20 sm:w-24 h-auto md:hidden"
+        />
+        <svg
+          ref={cloudRef}
+          viewBox={`0 0 ${W} ${H}`}
+          preserveAspectRatio="xMidYMid slice"
+          className="absolute inset-0 w-full h-full block"
+        />
+        <svg
+          ref={fgRef}
+          viewBox={`0 0 ${W} ${H}`}
+          preserveAspectRatio="xMidYMid slice"
+          className="absolute inset-0 w-full h-full block"
+        />
+      </div>
     </div>
   );
 }

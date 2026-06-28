@@ -37,10 +37,22 @@ function WaitlistCTA() {
   const statusColor = isSuccess ? 'rgba(60,120,50,0.95)' : isError ? 'rgba(180,50,40,0.95)' : 'rgba(58,40,24,0.6)';
 
   return (
-    <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <span
+        style={{
+          fontSize: 11,
+          color: 'rgba(42,24,8,0.75)',
+          fontWeight: 600,
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          paddingLeft: 10,
+        }}
+      >
+        Join waitlist
+      </span>
       <GlassCard
         radius={20}
-        borderColor="rgba(255,255,255,0.16)"
+        borderColor="rgba(255,255,255,0.7)"
         padding="p-0"
         className="flex items-center gap-[10px] pl-[18px] pr-[10px] py-[10px]"
       >
@@ -51,7 +63,7 @@ function WaitlistCTA() {
           onChange={e => { setEmail(e.target.value); if (status !== 'idle') setStatus('idle'); }}
           placeholder="your@email.com"
           disabled={disabled}
-          className="flex-1 min-w-0 bg-transparent border-none outline-none text-[#2a1808] text-[14px] placeholder:text-[#3a2818]/45 disabled:opacity-60"
+          className="flex-1 min-w-0 bg-transparent border-none outline-none text-[#2a1808] text-[14px] placeholder:text-[#2a1808] disabled:opacity-60"
         />
         <button
           type="submit"
@@ -228,8 +240,8 @@ export default function Home() {
 
   return (
     <>
-      {/* Hand-drawn scrolling background */}
-      <HandDrawnBackground />
+      {/* Hand-drawn scrolling background — zooms in to solid beige as user scrolls */}
+      <HandDrawnBackground scrollProgress={scrollProgress} />
 
       {/* Fixed left text panel — desktop: left side; mobile: centred above phone */}
       <div style={{

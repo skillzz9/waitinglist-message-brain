@@ -24,7 +24,7 @@ export default function GlassCard({
   containerClassName = '',
   padding = 'p-5',
   radius = 24,
-  borderColor = 'rgba(255, 255, 255, 0.09)',
+  borderColor = 'rgba(255, 255, 255, 0.55)',
   borderWidth = 1,
 }: GlassCardProps) {
   return (
@@ -33,9 +33,9 @@ export default function GlassCard({
       radius={radius}
       borderColor={borderColor}
       borderWidth={borderWidth}
-      background="rgba(255, 255, 255, 0.035)"
+      background="rgba(255, 255, 255, 0.55)"
       containerClassName={containerClassName}
-      className={['backdrop-blur-md', padding, className].filter(Boolean).join(' ')}
+      className={['backdrop-blur-2xl', padding, className].filter(Boolean).join(' ')}
     >
       {children}
     </SmoothBox>
