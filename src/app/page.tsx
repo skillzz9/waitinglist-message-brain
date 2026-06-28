@@ -121,6 +121,7 @@ export default function Home() {
   const [calendarProgress, setCalendarProgress] = useState(0);
   const [reverseProgress, setReverseProgress] = useState(0);
   const [notificationProgress, setNotificationProgress] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const targetRef = useRef({ x: 0, y: 0 });
   const currentRef = useRef({ x: 0, y: 0 });
   const rafRef = useRef<number | null>(null);
@@ -149,6 +150,13 @@ export default function Home() {
   }, [runLoop]);
 
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -185,7 +193,7 @@ export default function Home() {
   }, []);
 
   const headingStyle: React.CSSProperties = {
-    fontSize: 46,
+    fontSize: isMobile ? 36 : 46,
     fontFamily: '"Exposure VAR", serif',
     fontWeight: 400,
     lineHeight: 1.1,
@@ -197,8 +205,8 @@ export default function Home() {
     fontSize: 13,
     color: 'rgba(58,40,24,0.7)',
     lineHeight: 1.65,
-    maxWidth: 190,
-    margin: 0,
+    maxWidth: isMobile ? 'none' : 190,
+    margin: isMobile ? '0 auto' : 0,
   };
 
   // Text panel opacities — crossfade in sync with phone
@@ -223,13 +231,21 @@ export default function Home() {
       {/* Hand-drawn scrolling background */}
       <HandDrawnBackground />
 
-      {/* Fixed left text panel — crossfades between sections */}
+      {/* Fixed left text panel — desktop: left side; mobile: centred above phone */}
       <div style={{
         position: 'fixed',
-        top: '30%',
-        left: 40,
-        transform: 'translateY(-50%)',
-        width: 200,
+        ...(isMobile ? {
+          top: '12%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '82vw',
+          textAlign: 'center',
+        } : {
+          top: '30%',
+          left: 40,
+          transform: 'translateY(-50%)',
+          width: 200,
+        }),
         zIndex: 8,
       }}>
         {/* Section 1 — iMessage: text Kite */}
@@ -254,27 +270,36 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Fixed right panel — waitlist CTA (section 1 only) */}
+      {/* Waitlist CTA — desktop: right side; mobile: fixed bottom */}
       <div style={{
         position: 'fixed',
-        top: '50%',
-        right: 40,
-        transform: 'translateY(-50%)',
-        width: 268,
         zIndex: 8,
         opacity: s1opacity,
         pointerEvents: s1opacity > 0.05 ? 'auto' : 'none',
+        ...(isMobile ? {
+          bottom: 28,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '82vw',
+        } : {
+          top: '50%',
+          right: 40,
+          transform: 'translateY(-50%)',
+          width: 268,
+        }),
       }}>
         <WaitlistCTA />
       </div>
 
-      {/* Fixed phone */}
+      {/* Fixed phone — mobile: lower on screen to leave room for text above */}
       <div
         style={{
           position: 'fixed',
-          top: '50%',
+          top: isMobile ? '58%' : '50%',
           left: '50%',
-          transform: `translate(-50%, -50%) perspective(900px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)`,
+          transform: isMobile
+            ? 'translate(-50%, -50%)'
+            : `translate(-50%, -50%) perspective(900px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)`,
           zIndex: 10,
           willChange: 'transform',
         }}
