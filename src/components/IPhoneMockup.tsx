@@ -181,26 +181,43 @@ function DashboardScreen() {
   const CARD_MID   = '#6b5a3e';
   const CARD_LIGHT = '#9a8a78';
 
+  // Animate score slowly up and down so the KiteScene reacts live
+  const [liveScore, setLiveScore] = useState(65);
+  useEffect(() => {
+    const start = performance.now();
+    let raf: number;
+    const tick = () => {
+      const t = (performance.now() - start) / 1000;
+      // 22-second full cycle, range 18–96
+      setLiveScore(Math.round(57 + Math.sin(t * 0.285) * 39));
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const mood     = Math.round(52 + Math.sin(liveScore / 14 + 0.5) * 28);
+  const growth   = Math.round(60 + Math.sin(liveScore / 14 - 0.4) * 24);
+  const activity = Math.round(56 + Math.sin(liveScore / 14 + 1.1) * 26);
+
   const pills = [
-    { icon: '🌙', label: 'Mood',     score: 72 },
-    { icon: '🌱', label: 'Growth',   score: 85 },
-    { icon: '💬', label: 'Activity', score: 91 },
+    { icon: '🌙', label: 'Mood',     score: mood },
+    { icon: '🌱', label: 'Growth',   score: growth },
+    { icon: '💬', label: 'Activity', score: activity },
   ];
 
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', ...SF, backgroundColor: GROUND }}>
 
-      {/* Sky — paddingTop matches insets.top(~59×0.7=41px)+12×0.7≈8px native, minus the status bar already above */}
+      {/* Sky */}
       <div style={{ backgroundColor: SKY, paddingTop: 17, paddingBottom: 2, textAlign: 'center' }}>
-        {/* scoreSection.marginTop: 24×0.7=17 already included in paddingTop above */}
         <div style={{ fontSize: 9, color: 'rgba(58,32,16,0.55)', fontWeight: 500, letterSpacing: 0.35, marginBottom: 3 }}>Daily Score</div>
-        {/* scoreNumber: fontSize 80×0.7=56, lineHeight 88×0.7=62 */}
-        <div style={{ fontSize: 56, fontWeight: 700, color: DARK, lineHeight: '62px', letterSpacing: -1 }}>84</div>
+        <div style={{ fontSize: 56, fontWeight: 700, color: DARK, lineHeight: '62px', letterSpacing: -1 }}>{liveScore}</div>
       </div>
 
       {/* -2px margins kill the sub-pixel seam lines at sky/ground boundaries */}
       <div style={{ marginTop: -2, marginBottom: -2, flexShrink: 0 }}>
-        <KiteScene score={65} width={273} />
+        <KiteScene score={liveScore} width={273} />
       </div>
 
       {/* Ground — paddingTop: 24×0.7=17, paddingH: 20×0.7=14 */}
