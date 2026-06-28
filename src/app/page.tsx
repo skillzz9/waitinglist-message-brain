@@ -1,13 +1,11 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useRef, useState, useCallback, useEffect } from 'react';
 import GlassCard from '@/components/ui/GlassCard';
 import { SmoothBox } from '@/components/ui/SmoothBox';
 import IPhoneMockup from '@/components/IPhoneMockup';
+import HandDrawnBackground from '@/components/HandDrawnBackground';
 import { addToWaitlist } from '@/lib/firebase';
-
-const SideRays = dynamic(() => import('@/components/SideRays'), { ssr: false });
 
 type WaitlistStatus = 'idle' | 'loading' | 'success' | 'error' | 'duplicate' | 'invalid';
 
@@ -36,7 +34,7 @@ function WaitlistCTA() {
 
   const isError = status === 'error' || status === 'invalid' || status === 'duplicate';
   const isSuccess = status === 'success';
-  const statusColor = isSuccess ? 'rgba(150,220,150,0.85)' : isError ? 'rgba(255,150,140,0.85)' : 'rgba(255,255,255,0.4)';
+  const statusColor = isSuccess ? 'rgba(60,120,50,0.95)' : isError ? 'rgba(180,50,40,0.95)' : 'rgba(58,40,24,0.6)';
 
   return (
     <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -53,7 +51,7 @@ function WaitlistCTA() {
           onChange={e => { setEmail(e.target.value); if (status !== 'idle') setStatus('idle'); }}
           placeholder="your@email.com"
           disabled={disabled}
-          className="flex-1 min-w-0 bg-transparent border-none outline-none text-white text-[14px] placeholder:text-white/40 disabled:opacity-60"
+          className="flex-1 min-w-0 bg-transparent border-none outline-none text-[#2a1808] text-[14px] placeholder:text-[#3a2818]/45 disabled:opacity-60"
         />
         <button
           type="submit"
@@ -97,10 +95,10 @@ function WaitlistCTA() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingLeft: 10 }}>
         {status === 'idle' && (
           <svg width={13} height={13} viewBox="0 0 13 13" fill="none">
-            <circle cx="6.5" cy="6.5" r="5.75" stroke="rgba(255,255,255,0.3)" strokeWidth={1} />
+            <circle cx="6.5" cy="6.5" r="5.75" stroke="rgba(58,40,24,0.4)" strokeWidth={1} />
             <path
               d="M4 6.5l2 2 3-3"
-              stroke="rgba(255,255,255,0.6)"
+              stroke="rgba(58,40,24,0.7)"
               strokeWidth={1.2}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -191,13 +189,13 @@ export default function Home() {
     fontFamily: '"Exposure VAR", serif',
     fontWeight: 400,
     lineHeight: 1.1,
-    color: 'white',
+    color: '#2a1808',
     letterSpacing: '-0.01em',
     margin: 0,
   };
   const bodyStyle: React.CSSProperties = {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.48)',
+    color: 'rgba(58,40,24,0.7)',
     lineHeight: 1.65,
     maxWidth: 190,
     margin: 0,
@@ -222,47 +220,8 @@ export default function Home() {
 
   return (
     <>
-      {/* Fixed background */}
-      <div className="fixed inset-0" style={{ zIndex: 0, background: '#0d0804' }}>
-        <SideRays
-          rayColor1="#E8B55E"
-          rayColor2="#DC5A40"
-          origin="top-right"
-          speed={2.5}
-          intensity={2.2}
-          spread={2.2}
-          tilt={0}
-          saturation={1.8}
-          blend={0.55}
-          falloff={1.5}
-          opacity={1}
-        />
-      </div>
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          zIndex: 0,
-          background: `
-            radial-gradient(ellipse 70% 55% at 82% 18%, rgba(232, 181, 94, 0.32) 0%, transparent 65%),
-            radial-gradient(ellipse 50% 50% at 95% 5%,  rgba(220, 90, 64, 0.22) 0%, transparent 55%),
-            radial-gradient(ellipse 45% 40% at 60% 70%, rgba(232, 137, 90, 0.14) 0%, transparent 60%)
-          `,
-        }}
-      />
-      {/* Dusk overlay — blend of #8c7d84, #6f434c, #54607c, #815d5d, fades in on scroll */}
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          zIndex: 0,
-          opacity: scrollProgress,
-          background: `
-            radial-gradient(ellipse 70% 50% at 88% 12%, rgba(84, 96, 124, 0.75) 0%, transparent 65%),
-            radial-gradient(ellipse 65% 45% at 70% 35%, rgba(129, 93, 93, 0.55) 0%, transparent 70%),
-            radial-gradient(ellipse 80% 55% at 20% 75%, rgba(111, 67, 76, 0.65) 0%, transparent 70%),
-            radial-gradient(ellipse 90% 60% at 45% 50%, rgba(140, 125, 132, 0.45) 0%, transparent 75%)
-          `,
-        }}
-      />
+      {/* Hand-drawn scrolling background */}
+      <HandDrawnBackground />
 
       {/* Fixed left text panel — crossfades between sections */}
       <div style={{
