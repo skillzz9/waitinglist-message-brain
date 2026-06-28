@@ -431,8 +431,12 @@ export default function IPhoneMockup({
   }, [triggerConversation]);
 
   return (
+    // Outer wrapper: provides the reference frame for the border overlay
+    <div style={{ position: 'relative', flexShrink: 0, width: 273, height: 557 }}>
+
+    {/* Phone screen — clips all content to the rounded screen area */}
     <div
-      className="w-[273px] h-[557px] bg-[#111] rounded-[46px] border-[8px] border-[#2a2a2a] phone-shell overflow-hidden flex flex-col relative shrink-0"
+      className="w-[273px] h-[557px] bg-[#111] rounded-[46px] phone-shell overflow-hidden flex flex-col relative"
       style={{ isolation: 'isolate' }}
     >
       <div className="absolute top-[8px] left-1/2 -translate-x-1/2 w-[80px] h-[20px] bg-black rounded-[10px] z-20"/>
@@ -495,6 +499,18 @@ export default function IPhoneMockup({
 
       {/* iOS notification banner — slides down from top of phone screen */}
       <NotificationBanner progress={notificationProgress} />
+    </div>
+
+    {/* Phone border overlay — sibling outside overflow:hidden so it's always on top */}
+    <div style={{
+      position: 'absolute',
+      inset: 0,
+      borderRadius: 46,
+      border: '8px solid #2a2a2a',
+      pointerEvents: 'none',
+      zIndex: 200,
+    }} />
+
     </div>
   );
 }
