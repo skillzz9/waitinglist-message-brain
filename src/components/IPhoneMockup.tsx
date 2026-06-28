@@ -256,17 +256,23 @@ function NotificationBanner({ progress }: { progress: number }) {
       border: '0.5px solid rgba(255,255,255,0.12)',
       ...SF,
     }}>
+      {/* iMessage app icon — green Messages bubble */}
       <div style={{
         width: 36, height: 36, borderRadius: 9,
-        background: 'linear-gradient(135deg, #E8B55E 0%, #DC5A40 100%)',
+        background: 'linear-gradient(180deg, #6DD75A 0%, #34C759 100%)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexShrink: 0, fontSize: 18,
+        flexShrink: 0,
       }}>
-        🪁
+        <svg width={22} height={21} viewBox="0 0 22 21" fill="white">
+          <path d="M11 0C4.925 0 0 4.253 0 9.5c0 2.79 1.3 5.29 3.375 7.033L2.5 21l4.45-2.22C8.2 19.57 9.56 19.75 11 19.75 17.075 19.75 22 15.497 22 9.5S17.075 0 11 0z"/>
+        </svg>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>Kite</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>Kite</span>
+            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)' }}>iMessage</span>
+          </div>
           <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>now</span>
         </div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', lineHeight: 1.3 }}>⏰ Reminder: your deadline is tomorrow at 9am</div>
