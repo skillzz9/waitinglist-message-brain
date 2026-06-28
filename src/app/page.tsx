@@ -256,8 +256,8 @@ export default function Home() {
           </div>
           {/* Section 4 — Reverse switch: meditation */}
           <div style={{ ...textPanel, opacity: s4opacity }}>
-            <h1 style={headingStyle}>There when<br />it counts,</h1>
-            <p style={bodyStyle}>Just tell Kite how you&apos;re feeling. It quietly sets things up in the app to look after you.</p>
+            <h1 style={headingStyle}>Recommends what you need<br />when you need it,</h1>
+            <p style={bodyStyle}>Meditation app built in, set up based on how YOU feel.</p>
           </div>
           {/* Section 5 — Reminders */}
           <div style={{ ...textPanel, opacity: s5opacity }}>
