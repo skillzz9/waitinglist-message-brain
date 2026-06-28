@@ -271,27 +271,7 @@ function renderSkyOverlay(rootSvg: SVGSVGElement, rc: RoughSVG, t: number, boilT
     }));
   });
 
-  // ── Rolling hills at bottom — two layers, very slow ──────────────────────
-  // Back hills: tall, muted sage, slower
-  const backScroll = (t * 3.5) % 450;
-  for (let i = -1; i < 4; i++) {
-    const x = i * 450 + backScroll;
-    svg.appendChild(rc.path(
-      `M ${x} 520 Q ${x + 225} 355 ${x + 450} 520`,
-      { stroke: '#9aad7a', strokeWidth: 2, fill: '#abbe88', fillStyle: 'solid', roughness: 2.2, seed: seed(i + 150) },
-    ));
-  }
-  // Front hills: lower profile, warmer green, slightly faster
-  const frontScroll = (t * 5) % 380;
-  for (let i = -1; i < 5; i++) {
-    const x = i * 380 + frontScroll;
-    svg.appendChild(rc.path(
-      `M ${x} 520 Q ${x + 190} 418 ${x + 380} 520`,
-      { stroke: '#7a8a5a', strokeWidth: 2, fill: '#8a9a68', fillStyle: 'solid', roughness: 2.0, seed: seed(i + 160) },
-    ));
-  }
-
-  // ── Birds: smooth gull-shape bezier wings ────────────────────────────────
+  // ── Birds: scribbly roughjs lines matching the cloud aesthetic ──────────
   // [startX, y, count, spread, pxPerSec]
   const flockDefs: [number, number, number, number, number][] = [
     [220,  90, 3, 55, 22],
@@ -302,25 +282,15 @@ function renderSkyOverlay(rootSvg: SVGSVGElement, rc: RoughSVG, t: number, boilT
     for (let bi = 0; bi < count; bi++) {
       const birdX = groupX + (bi - (count - 1) / 2) * spread;
       const birdY = by + Math.sin(t * 1.2 + bi * 1.1 + fi * 1.5) * 8;
-      const flap  = Math.sin(t * 5.5 + bi * 1.3 + fi * 2.2); // -1 to 1
-      const ws    = 26;
-      const h     = ws * (0.38 + flap * 0.18); // arc height varies with flap phase
-
-      const lp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      lp.setAttribute('d', `M ${birdX} ${birdY} Q ${birdX - ws * 0.5} ${birdY - h * 1.5} ${birdX - ws} ${birdY - h * 0.3}`);
-      lp.setAttribute('stroke', '#3a2818');
-      lp.setAttribute('stroke-width', '2');
-      lp.setAttribute('stroke-linecap', 'round');
-      lp.setAttribute('fill', 'none');
-      svg.appendChild(lp);
-
-      const rp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      rp.setAttribute('d', `M ${birdX} ${birdY} Q ${birdX + ws * 0.5} ${birdY - h * 1.5} ${birdX + ws} ${birdY - h * 0.3}`);
-      rp.setAttribute('stroke', '#3a2818');
-      rp.setAttribute('stroke-width', '2');
-      rp.setAttribute('stroke-linecap', 'round');
-      rp.setAttribute('fill', 'none');
-      svg.appendChild(rp);
+      const flap  = Math.sin(t * 5.5 + bi * 1.3 + fi * 2.2) * 9;
+      const ws = 24;
+      const vy = ws * 0.4;
+      svg.appendChild(rc.line(birdX, birdY, birdX - ws, birdY - vy - flap, {
+        stroke: '#3a2818', strokeWidth: 2, roughness: 2.8, seed: seed(fi * 20 + bi * 3 + 200),
+      }));
+      svg.appendChild(rc.line(birdX, birdY, birdX + ws, birdY - vy - flap, {
+        stroke: '#3a2818', strokeWidth: 2, roughness: 2.8, seed: seed(fi * 20 + bi * 3 + 201),
+      }));
     }
   });
 }
