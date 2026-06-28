@@ -82,18 +82,18 @@ function WaitlistCTA() {
           >
             {isSuccess ? (
               <svg width={15} height={15} viewBox="0 0 15 15" fill="none">
-                <path d="M3 7.5l3.5 3.5L12 5" stroke="white" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M3 7.5l3.5 3.5L12 5" stroke="#2a1808" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             ) : status === 'loading' ? (
               <svg width={15} height={15} viewBox="0 0 15 15" fill="none" style={{ animation: 'spin 0.8s linear infinite' }}>
-                <circle cx="7.5" cy="7.5" r="5.5" stroke="white" strokeOpacity="0.25" strokeWidth={1.8}/>
-                <path d="M13 7.5a5.5 5.5 0 0 0-5.5-5.5" stroke="white" strokeWidth={1.8} strokeLinecap="round"/>
+                <circle cx="7.5" cy="7.5" r="5.5" stroke="#2a1808" strokeOpacity="0.25" strokeWidth={1.8}/>
+                <path d="M13 7.5a5.5 5.5 0 0 0-5.5-5.5" stroke="#2a1808" strokeWidth={1.8} strokeLinecap="round"/>
               </svg>
             ) : (
               <svg width={15} height={15} viewBox="0 0 15 15" fill="none">
                 <path
                   d="M2.5 7.5h10M9 3.5l4 4-4 4"
-                  stroke="white"
+                  stroke="#2a1808"
                   strokeWidth={1.8}
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -263,7 +263,7 @@ export default function Home() {
         {/* Section 1 — iMessage: text Kite */}
         <div style={{ ...textPanel, opacity: s1opacity, pointerEvents: s1opacity > 0.05 ? 'auto' : 'none' }}>
           <h1 style={headingStyle}>Just text<br />Kite,</h1>
-          <p style={bodyStyle}>Tell it about your day and how you feel. No apps to open — it lives right in your messages.</p>
+          <p style={bodyStyle}>Tell it about your day like a diary, it&apos;s here to listen whenever you need it.</p>
         </div>
         {/* Section 2 — Dashboard: private score */}
         <div style={{ ...textPanel, opacity: s2opacity }}>
