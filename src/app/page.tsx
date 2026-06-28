@@ -286,8 +286,6 @@ export default function Home() {
       <div style={{
         position: 'fixed',
         zIndex: 8,
-        opacity: s1opacity,
-        pointerEvents: s1opacity > 0.05 ? 'auto' : 'none',
         ...(isMobile ? {
           top: '26%',
           left: '50%',
