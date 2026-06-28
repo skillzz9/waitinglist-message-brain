@@ -1,12 +1,23 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import StatusBar      from './iphoneParts/StatusBar';
-import ChatHeader     from './iphoneParts/ChatHeader';
+import dynamic from 'next/dynamic';
+import StatusBar  from './iphoneParts/StatusBar';
+import ChatHeader from './iphoneParts/ChatHeader';
 import MessageBubbles from './iphoneParts/MessageBubbles';
 import InputBar       from './iphoneParts/InputBar';
 import Keyboard       from './iphoneParts/Keyboard';
 import type { SendPhase } from './iphoneParts/types';
+
+// KiteScene uses roughjs (internally random) + performance.now() + rAF — must be client-only
+const KiteScene = dynamic(
+  () => import('./iphoneParts/KiteScene').then(m => ({ default: m.KiteScene })),
+  {
+    ssr: false,
+    // Placeholder matches the component's rendered height (Math.round(273 * 520 / 900) = 158px)
+    loading: () => <div style={{ width: 273, height: 158, backgroundColor: '#f7eed5', flexShrink: 0 }} />,
+  }
+);
 
 function makeOneShot(src: string, volume = 0.7) {
   if (typeof window === 'undefined') return () => {};
@@ -34,31 +45,126 @@ const SF: React.CSSProperties = {
   fontFamily: '-apple-system, "SF Pro Text", system-ui, sans-serif',
 };
 
+/* ─── tab bar icons — SF Symbol approximations ── */
+function HomeIcon({ color, filled }: { color: string; filled?: boolean }) {
+  if (filled) {
+    return (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill={color}>
+        <path d="M12 3L3 10.5V21h5.5v-6.5h7V21H21V10.5L12 3Z"/>
+      </svg>
+    );
+  }
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 10.5L12 3l9 7.5V21h-5.5v-6.5h-7V21H3V10.5z"/>
+    </svg>
+  );
+}
+
+function CalendarIcon({ color }: { color: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="4.5" width="18" height="15.5" rx="2.5" stroke={color} strokeWidth="1.8"/>
+      <path d="M3 9.5h18" stroke={color} strokeWidth="1.8"/>
+      <path d="M8 3v3M16 3v3" stroke={color} strokeWidth="1.8" strokeLinecap="round"/>
+      <rect x="6.5" y="12" width="2.5" height="2.5" rx="0.6" fill={color}/>
+      <rect x="10.75" y="12" width="2.5" height="2.5" rx="0.6" fill={color}/>
+      <rect x="15" y="12" width="2.5" height="2.5" rx="0.6" fill={color}/>
+      <rect x="6.5" y="15.5" width="2.5" height="2.5" rx="0.6" fill={color}/>
+      <rect x="10.75" y="15.5" width="2.5" height="2.5" rx="0.6" fill={color}/>
+    </svg>
+  );
+}
+
+function GearIcon({ color }: { color: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" stroke={color} strokeWidth="1.8"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke={color} strokeWidth="1.8"/>
+    </svg>
+  );
+}
+
 /* ─── shared tab bar ────────────────────────── */
-function TabBar({ active }: { active: 'dashboard' | 'calendar' }) {
+function TabBar({ active, theme = 'dark' }: { active: 'dashboard' | 'calendar'; theme?: 'dark' | 'warm' }) {
+  const isWarm = theme === 'warm';
+
+  if (isWarm) {
+    // Match the iOS squircle pill style from the screenshot
+    const ACTIVE_C   = '#007AFF'; // iOS blue
+    const INACTIVE_C = 'rgba(58,32,16,0.55)'; // muted dark brown
+    const tabs = [
+      { id: 'dashboard', label: 'Dashboard' },
+      { id: 'calendar',  label: 'Calendar'  },
+      { id: 'settings',  label: 'Settings'  },
+    ] as const;
+
+    return (
+      <div style={{ backgroundColor: '#d4b87c', padding: '5px 8px 10px', flexShrink: 0 }}>
+        {/* Single squircle container — matches iOS liquid glass pill */}
+        <div style={{
+          display: 'flex',
+          borderRadius: 18,
+          background: 'rgba(255,255,255,0.22)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          padding: '3px',
+          gap: 2,
+        }}>
+          {tabs.map(t => {
+            const isActive = t.id === active;
+            const c = isActive ? ACTIVE_C : INACTIVE_C;
+            return (
+              <div key={t.id} style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1,
+                padding: '4px 2px 3px',
+                borderRadius: 15,
+                background: isActive ? 'rgba(255,255,255,0.55)' : 'transparent',
+              }}>
+                {t.id === 'dashboard' && <HomeIcon color={c} filled={isActive} />}
+                {t.id === 'calendar'  && <CalendarIcon color={c} />}
+                {t.id === 'settings'  && <GearIcon color={c} />}
+                <span style={{ fontSize: 8, color: c, fontWeight: isActive ? 700 : 500, letterSpacing: -0.1 }}>
+                  {t.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // Dark theme (calendar screen)
+  const activeC   = '#facc15';
+  const inactiveC = 'rgba(255,255,255,0.4)';
   const tabs = [
-    { id: 'dashboard', icon: '⊞', label: 'Dashboard' },
-    { id: 'calendar',  icon: '📅', label: 'Calendar'  },
-    { id: 'settings',  icon: '⚙',  label: 'Settings'  },
+    { id: 'dashboard', label: 'Dashboard' },
+    { id: 'calendar',  label: 'Calendar'  },
+    { id: 'settings',  label: 'Settings'  },
   ] as const;
+
   return (
     <div style={{
       display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-      background: 'rgba(10,8,20,0.75)', backdropFilter: 'blur(16px)',
+      background: 'rgba(10,8,20,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
       borderTop: '0.5px solid rgba(255,255,255,0.1)',
-      padding: '10px 0 12px', flexShrink: 0,
+      padding: '10px 0 14px', flexShrink: 0,
     }}>
       {tabs.map(t => {
         const isActive = t.id === active;
+        const c = isActive ? activeC : inactiveC;
         return (
           <div key={t.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-            <div style={{
-              width: 36, height: 28, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: isActive ? 'rgba(232,181,94,0.2)' : 'transparent',
-            }}>
-              <span style={{ fontSize: 16 }}>{t.icon}</span>
-            </div>
-            <span style={{ fontSize: 9, color: isActive ? '#E8B55E' : 'rgba(255,255,255,0.4)', fontWeight: isActive ? 600 : 400 }}>{t.label}</span>
+            {t.id === 'dashboard' && <HomeIcon color={c} filled={isActive} />}
+            {t.id === 'calendar'  && <CalendarIcon color={c} />}
+            {t.id === 'settings'  && <GearIcon color={c} />}
+            <span style={{ fontSize: 9, color: c, fontWeight: isActive ? 600 : 400 }}>{t.label}</span>
           </div>
         );
       })}
@@ -67,49 +173,69 @@ function TabBar({ active }: { active: 'dashboard' | 'calendar' }) {
 }
 
 /* ─── dashboard screen ───────────────────────── */
+// All values scaled from mobile stylesheet at 273/390 ≈ 0.7
 function DashboardScreen() {
+  const SKY        = '#f7eed5';
+  const GROUND     = '#d4b87c';
+  const DARK       = '#3a2010';
+  const CARD_MID   = '#6b5a3e';
+  const CARD_LIGHT = '#9a8a78';
+
   const pills = [
     { icon: '🌙', label: 'Mood',     score: 72 },
     { icon: '🌱', label: 'Growth',   score: 85 },
     { icon: '💬', label: 'Activity', score: 91 },
   ];
+
   return (
-    <div style={{
-      width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', ...SF,
-      background: 'linear-gradient(175deg, #1a1f3c 0%, #2d2040 30%, #6b3a2a 62%, #c47a3a 82%, #e8a84a 100%)',
-      position: 'relative',
-    }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 120% 50% at 50% 90%, rgba(240,200,120,0.18) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', padding: '14px 16px 0' }}>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 2 }}>☀️ Good Morning</div>
-        <div style={{ fontSize: 22, fontWeight: 700, color: 'white', lineHeight: 1.2, marginBottom: 18 }}>How are you doing?</div>
-        <div style={{ textAlign: 'center', marginBottom: 16 }}>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.05em', marginBottom: 2 }}>Daily Score</div>
-          <div style={{ fontSize: 72, fontWeight: 800, color: 'white', lineHeight: 1, letterSpacing: '-0.03em' }}>84</div>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 18 }}>
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', ...SF, backgroundColor: GROUND }}>
+
+      {/* Sky — paddingTop matches insets.top(~59×0.7=41px)+12×0.7≈8px native, minus the status bar already above */}
+      <div style={{ backgroundColor: SKY, paddingTop: 17, paddingBottom: 2, textAlign: 'center' }}>
+        {/* scoreSection.marginTop: 24×0.7=17 already included in paddingTop above */}
+        <div style={{ fontSize: 9, color: 'rgba(58,32,16,0.55)', fontWeight: 500, letterSpacing: 0.35, marginBottom: 3 }}>Daily Score</div>
+        {/* scoreNumber: fontSize 80×0.7=56, lineHeight 88×0.7=62 */}
+        <div style={{ fontSize: 56, fontWeight: 700, color: DARK, lineHeight: '62px', letterSpacing: -1 }}>84</div>
+      </div>
+
+      {/* -2px margins kill the sub-pixel seam lines at sky/ground boundaries */}
+      <div style={{ marginTop: -2, marginBottom: -2, flexShrink: 0 }}>
+        <KiteScene score={65} width={273} />
+      </div>
+
+      {/* Ground — paddingTop: 24×0.7=17, paddingH: 20×0.7=14 */}
+      <div style={{ flex: 1, backgroundColor: GROUND, paddingTop: 17, paddingLeft: 14, paddingRight: 14, display: 'flex', flexDirection: 'column' }}>
+
+        {/* Pills — compact, pulled up toward KiteScene boundary */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 10, marginTop: -14 }}>
           {pills.map(p => (
-            <div key={p.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(232,181,94,0.45)', borderRadius: 100, padding: '5px 10px' }}>
-                <span style={{ fontSize: 12 }}>{p.icon}</span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#E8B55E' }}>{p.score}</span>
+            <div key={p.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+              <div style={{ border: '1px solid rgba(247,238,213,0.45)', borderRadius: 50, padding: '4px 9px', backgroundColor: 'rgba(0,0,0,0.18)' }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: SKY }}>{p.icon} {p.score}</span>
               </div>
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>{p.label}</span>
+              <span style={{ fontSize: 7, color: 'rgba(247,238,213,0.75)', fontWeight: 500 }}>{p.label}</span>
             </div>
           ))}
         </div>
-        <div style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(255,255,255,0.2)', borderRadius: 16, padding: '12px 14px', flex: 1 }}>
-          <div style={{ fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 14 }}>Today&apos;s Journal</div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: 8 }}>
-            <svg width={22} height={18} viewBox="0 0 24 20" fill="none">
-              <path d="M2 2h9v16H2zM13 2h9v16h-9z" stroke="rgba(232,181,94,0.5)" strokeWidth={1.5} strokeLinejoin="round"/>
+
+        {/* Journal card — card.borderRadius 28×0.7=20 */}
+        <div style={{ flex: 1, background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)', border: '1px solid rgba(255,255,255,0.35)', borderRadius: 20, padding: '9px 10px', marginBottom: 10 }}>
+          {/* cardSectionLabel: fontSize 11×0.7=8 */}
+          <div style={{ fontSize: 8, fontWeight: 600, color: CARD_LIGHT, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>TODAY&apos;S JOURNAL</div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: 6 }}>
+            <svg width={18} height={15} viewBox="0 0 24 20" fill="none">
+              <path d="M2 2h9v16H2zM13 2h9v16h-9z" stroke={CARD_LIGHT} strokeWidth={1.5} strokeLinejoin="round"/>
             </svg>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(232,181,94,0.8)' }}>No entry yet today</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textAlign: 'center', lineHeight: 1.4 }}>Keep chatting — your journal{'\n'}generates automatically</div>
+            {/* emptyText: fontSize 15×0.7=10, emptySub: fontSize 12×0.7=8 */}
+            <div style={{ fontSize: 10, fontWeight: 500, color: CARD_MID }}>No entry yet today</div>
+            <div style={{ fontSize: 8, color: CARD_LIGHT, textAlign: 'center', lineHeight: 1.5 }}>Keep chatting — your journal generates automatically</div>
           </div>
         </div>
       </div>
-      <TabBar active="dashboard" />
+
+      <TabBar active="dashboard" theme="warm" />
+      {/* Home-indicator safe-area — ground colour fills the ~1cm gap at the very bottom */}
+      <div style={{ backgroundColor: '#d4b87c', height: 18, flexShrink: 0 }} />
     </div>
   );
 }
@@ -368,16 +494,10 @@ function KiteNotificationBanner({ show }: { show: boolean }) {
       border: '0.5px solid rgba(255,255,255,0.12)',
       ...SF,
     }}>
-      {/* Kite app icon — orange gradient K */}
-      <div style={{
-        width: 36, height: 36, borderRadius: 9,
-        background: 'linear-gradient(135deg, #E8B55E 0%, #DC5A40 100%)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexShrink: 0,
-        fontSize: 18, fontWeight: 700, color: 'white',
-        fontFamily: '-apple-system, system-ui, sans-serif',
-      }}>
-        K
+      {/* Kite app icon */}
+      <div style={{ width: 36, height: 36, borderRadius: 9, overflow: 'hidden', flexShrink: 0 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="Kite" width={36} height={36} style={{ width: 36, height: 36, objectFit: 'cover', display: 'block' }} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 1 }}>
@@ -473,7 +593,9 @@ export default function IPhoneMockup({
   const bgOpacity   = Math.min(enterT * 1.5, 1);
 
   // ── Reverse app-switch animation (Kite → iMessage) ──
-  const rp = reverseProgress;
+  // Guard: only allow reverse when calendar has been fully shown (calendarProgress>=1),
+  // otherwise a tiny blip in reverseProgress at the dashboard section causes a flash.
+  const rp = calendarProgress >= 1 ? reverseProgress : 0;
   const revEnterT  = N(rp, 0, 0.35);  // Kite card zooms out to card size
   const revSwipeT  = N(rp, 0.35, 0.65); // Kite exits right, iMessage enters from left
   const revLaunchT = N(rp, 0.65, 1.0);  // iMessage launches to full screen
@@ -493,6 +615,13 @@ export default function IPhoneMockup({
 
   // During reverse: bg stays at 1 through enter+swipe, fades as iMessage launches
   const finalBgOpacity   = inReverse ? Math.max(0, 1 - revLaunchT) : bgOpacity;
+
+  // Status bar: blend toward beige sky when dashboard is the top visible layer
+  // Only go beige once the kite card is actually filling the screen (launchT for forward, 1-revEnterT for reverse)
+  const kiteFullscreen = inReverse ? (1 - revEnterT) : launchT;
+  const statusBarBlend = Math.max(0, Math.min(1, finalKiteOpacity * (1 - finalImsgOpacity) * (1 - calendarProgress) * kiteFullscreen));
+  const statusBarBg = `rgb(${Math.round(statusBarBlend * 247)},${Math.round(statusBarBlend * 238)},${Math.round(statusBarBlend * 213)})`;
+  const statusBarDark = statusBarBlend > 0.5;
 
   // ── Meditation notification — hide when scrolled back or S5 starts ──
   useEffect(() => { if (reverseProgress < 0.5) setMeditationNotifShow(false); }, [reverseProgress]);
@@ -599,11 +728,11 @@ export default function IPhoneMockup({
       className="w-[273px] h-[557px] bg-[#111] rounded-[46px] phone-shell overflow-hidden flex flex-col relative"
       style={{ isolation: 'isolate' }}
     >
-      <div className="absolute top-[8px] left-1/2 -translate-x-1/2 w-[80px] h-[20px] bg-black rounded-[10px] z-20"/>
+      <div className="absolute top-[8px] left-1/2 -translate-x-1/2 w-[80px] h-[20px] rounded-[10px] z-20" style={{ backgroundColor: '#1a1a1a' }}/>
 
-      {/* Permanent status bar — always visible, never animated */}
-      <div className="relative z-20 bg-black">
-        <StatusBar />
+      {/* Status bar — bg transitions to sky beige when dashboard fills screen; -1px overlap kills sub-pixel seam */}
+      <div className="relative z-20" style={{ backgroundColor: statusBarBg, marginBottom: -1 }}>
+        <StatusBar dark={statusBarDark} />
       </div>
 
       <div className="flex-1 relative overflow-hidden">
